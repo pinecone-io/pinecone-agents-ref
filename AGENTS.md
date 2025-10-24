@@ -27,7 +27,7 @@ Determine the primary programming language by checking for these files:
 
 ### 🔧 CLI vs SDK: When to Use Which
 
-**Use the Pinecone CLI for:**
+**Use the Pinecone CLI for one-time or automated administrative tasks:**
 
 - ✅ **Creating indexes** - `pc index create`
 - ✅ **Deleting indexes** - `pc index delete`
@@ -36,19 +36,16 @@ Determine the primary programming language by checking for these files:
 - ✅ **Describing indexes** - `pc index describe`
 - ✅ **Creating API keys** - `pc api-key create`
 - ✅ **One-off inspection** - Checking stats, configuration
-- ✅ **Development setup** - All initial infrastructure setup
+- ✅ **Automated deployment pipelines** - All initial infrastructure setup
 
-**Use the SDK for:**
+**Use the SDK for application code:**
 
-- ✅ **Data operations in application code** - upsert, query, search, delete RECORDS
-- ✅ **Runtime checks** - `pc.has_index()`, `index.describe_index_stats()`
-- ✅ **Automated workflows** - Any data operations that run repeatedly
-- ✅ **Production data access** - Reading and writing vectors/records
-
-**❌ NEVER use SDK for:**
-
-- Creating, deleting, or configuring indexes in application code
-- One-time administrative tasks
+- ✅ **Ensuring index existence and correctness** - Creating/updating indexes as part of application startup
+- ✅ **Dynamic index management** - based on application's logic and requirements
+- ✅ **Vector operations** - upsert, query, search, delete vectors
+- ✅ **Records operations** - upsert, query, search, delete RECORDS (automatic embeddings generation)
+- ✅ **Other services** - explicit embeddings generation, reranking, etc.
+- ✅ **Unit and integration tests**
 
 ### Installing the Pinecone CLI
 
