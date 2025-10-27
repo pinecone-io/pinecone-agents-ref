@@ -47,54 +47,13 @@ Determine the primary programming language by checking for these files:
 - ✅ **Other services** - explicit embeddings generation, reranking, etc.
 - ✅ **Unit and integration tests**
 
-### Installing the Pinecone CLI
+## CLI Setup and Usage
 
-**macOS (Homebrew):**
-
-```bash
-brew tap pinecone-io/tap
-brew install pinecone-io/tap/pinecone
-```
-
-**Other platforms:**
-Download from [GitHub Releases](https://github.com/pinecone-io/cli/releases)
-
-### CLI Authentication
-
-Choose one method:
-
-**Option 1: User login (recommended for development)**
-
-```bash
-pc login
-pc target -o "my-org" -p "my-project"
-```
-
-**Option 2: API key**
-
-```bash
-export PINECONE_API_KEY="your-api-key"
-# Or: pc auth configure --global-api-key <api-key>
-```
-
-**Option 3: Service account**
-
-```bash
-export PINECONE_CLIENT_ID="your-client-id"
-export PINECONE_CLIENT_SECRET="your-client-secret"
-```
+For detailed CLI installation, authentication, and command reference, see [AGENTS-cli.md](./AGENTS-cli.md).
 
 ## Index Creation
 
-> **⚠️ Use CLI (`pc index create`), NOT SDK in application code.**
-
-### Index creation with integrated embeddings (preferred)
-
-```bash
-pc index create -n my-index -m cosine -c aws -r us-east-1 \
-  --model llama-text-embed-v2 \
-  --field_map text=content
-```
+> **⚠️ Use CLI (`pc index create`), NOT SDK in application code. See [AGENTS-cli.md](./AGENTS-cli.md) for detailed commands.**
 
 ### Available embedding models (current)
 
