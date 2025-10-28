@@ -8,11 +8,11 @@ This guide covers critical gotchas, best practices, and common patterns for Pine
 
 Determine the primary programming language by checking for these files:
 
-- **`package.json`** → TypeScript/Node.js (see [AGENTS-typescript.md](./AGENTS-typescript.md))
-- **`requirements.txt` or `pyproject.toml`** → Python (see [AGENTS-python.md](./AGENTS-python.md))
-- **`pom.xml` or `build.gradle`** → Java (see [AGENTS-java.md](./AGENTS-java.md))
-- **`go.mod`** → Go (see [AGENTS-go.md](./AGENTS-go.md))
-- **Default fallback** → Python (see [AGENTS-python.md](./AGENTS-python.md))
+- **`package.json`** → TypeScript/Node.js (see [AGENTS-typescript.md](./.agents/AGENTS-typescript.md))
+- **`requirements.txt` or `pyproject.toml`** → Python (see [AGENTS-python.md](./.agents/AGENTS-python.md))
+- **`pom.xml` or `build.gradle`** → Java (see [AGENTS-java.md](./.agents/AGENTS-java.md))
+- **`go.mod`** → Go (see [AGENTS-go.md](./.agents/AGENTS-go.md))
+- **Default fallback** → Python (see [AGENTS-python.md](./.agents/AGENTS-python.md))
 
 ## Universal Concepts (All Languages)
 
@@ -49,11 +49,11 @@ Determine the primary programming language by checking for these files:
 
 ## CLI Setup and Usage
 
-For detailed CLI installation, authentication, and command reference, see [AGENTS-cli.md](./AGENTS-cli.md).
+For detailed CLI installation, authentication, and command reference, see [AGENTS-cli.md](./.agents/AGENTS-cli.md).
 
 ## Index Creation
 
-> **⚠️ Use CLI (`pc index create`), NOT SDK in application code. See [AGENTS-cli.md](./AGENTS-cli.md) for detailed commands.**
+> **⚠️ Use CLI (`pc index create`), NOT SDK in application code. See [AGENTS-cli.md](./.agents/AGENTS-cli.md) for detailed commands.**
 
 ### Available embedding models (current)
 
