@@ -4,6 +4,10 @@
 
 This guide covers critical gotchas, best practices, and common patterns for Pinecone across multiple programming languages. For language-specific examples and patterns, see the appropriate language file below.
 
+## Getting Started
+
+- **New to Pinecone?** Start with [Quickstart Guide](./.agents/AGENTS-quickstart.md) - step-by-step tutorials for building your first app
+
 ## Language Detection
 
 Determine the primary programming language by checking for these files:
