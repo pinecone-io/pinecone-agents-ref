@@ -4,9 +4,35 @@
 
 This guide covers critical gotchas, best practices, and common patterns for Pinecone across multiple programming languages. For language-specific examples and patterns, see the appropriate language file below.
 
-## Getting Started
+## Choosing the Right Guide
 
-- **New to Pinecone?** Start with [Quickstart Guide](./.agents/AGENTS-quickstart.md) - step-by-step tutorials for building your first app
+Based on what the user is asking, consult these guides:
+
+### Getting Started
+
+- **User wants to learn Pinecone** → [AGENTS-quickstart.md](./.agents/AGENTS-quickstart.md)
+- **User needs a specific use case** → [AGENTS-quickstart.md](./.agents/AGENTS-quickstart.md) (then link to language-specific examples)
+
+### Installation & Setup
+
+- **CLI installation/usage** → [AGENTS-cli.md](./.agents/AGENTS-cli.md)
+- **SDK installation by language**:
+  - Python → [AGENTS-python.md](./.agents/AGENTS-python.md#installation--setup)
+  - TypeScript/Node.js → [AGENTS-typescript.md](./.agents/AGENTS-typescript.md#installation--setup)
+  - Go → [AGENTS-go.md](./.agents/AGENTS-go.md#installation--setup)
+  - Java → [AGENTS-java.md](./.agents/AGENTS-java.md#installation--setup)
+
+### Implementation
+
+- **Building features in Python** → [AGENTS-python.md](./.agents/AGENTS-python.md)
+- **Building features in TypeScript/Node.js** → [AGENTS-typescript.md](./.agents/AGENTS-typescript.md)
+- **Building features in Go** → [AGENTS-go.md](./.agents/AGENTS-go.md)
+- **Building features in Java** → [AGENTS-java.md](./.agents/AGENTS-java.md)
+
+### Universal Concepts
+
+- **Use this file** for CLI vs SDK guidance, common mistakes, constraints, error handling
+- **Language-specific info** → See language-specific files above
 
 ## Language Detection
 
