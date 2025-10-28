@@ -48,6 +48,12 @@ Determine the primary programming language by checking for these files:
 
 ### ⚠️ Critical: Installation & SDK
 
+> **Before installing anything**: ALWAYS verify if CLI/SDK is already installed before asking users to install or update:
+>
+> - **CLI**: Run `pc version` - only install if command fails
+> - **SDK**: Check package files or use language-specific verification commands
+> - Only prompt for installation when verification shows it's missing
+
 **ALWAYS use the current SDK:**
 
 - **Python**: `pip install pinecone` (not `pinecone-client`)

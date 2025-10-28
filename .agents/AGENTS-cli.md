@@ -8,6 +8,8 @@ This guide provides comprehensive CLI setup, authentication, and command referen
 
 ## Installation
 
+> **⚠️ Before installing**: ALWAYS check if the CLI is already installed by running `pc version`. Only prompt for installation if the command fails or CLI is not found.
+
 ### macOS (Homebrew)
 
 ```bash

@@ -75,7 +75,20 @@ When you are asked to help get started with Pinecone:
 
 Before starting any quickstart, complete these steps:
 
+> **⚠️ Important**: Check if prerequisites are already installed before prompting users to install them:
+>
+> - **CLI**: Run `pc version` to check if installed
+> - **SDK**: Check if package files exist or run language-specific commands to verify
+
 ### 1. Install Pinecone CLI
+
+**First, check if already installed:**
+
+```bash
+pc version
+```
+
+Only proceed with installation if the above command fails.
 
 **macOS:**
 
@@ -95,6 +108,38 @@ pc version
 ```
 
 ### 2. Install SDK (Choose Your Language)
+
+**First, check if SDK is already installed:**
+
+**Python:**
+
+```bash
+pip show pinecone
+```
+
+**TypeScript/Node.js:**
+
+```bash
+npm list @pinecone-database/pinecone
+# or
+yarn list --pattern @pinecone-database/pinecone
+```
+
+**Go:**
+
+```bash
+go list -m github.com/pinecone-io/go-pinecone/pinecone
+```
+
+**Java:**
+
+```bash
+mvn dependency:tree | grep pinecone-client
+# or
+gradle dependencies | grep pinecone-client
+```
+
+**If not installed, install with:**
 
 **Python:**
 
