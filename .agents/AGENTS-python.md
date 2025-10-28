@@ -1,6 +1,6 @@
 # Pinecone Python SDK Guide
 
-> **Prerequisites**: See [AGENTS.md](./AGENTS.md) for universal concepts and setup.
+> **Prerequisites**: See [AGENTS.md](../AGENTS.md) for universal concepts and setup.
 
 This guide provides Python-specific patterns, examples, and best practices for the Pinecone SDK.
 

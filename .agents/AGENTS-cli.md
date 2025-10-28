@@ -1,6 +1,6 @@
 # Pinecone CLI Guide
 
-> **Prerequisites**: See [AGENTS.md](./AGENTS.md) for universal concepts and CLI vs SDK guidance.
+> **Prerequisites**: See [AGENTS.md](../AGENTS.md) for universal concepts and CLI vs SDK guidance.
 
 This guide provides comprehensive CLI setup, authentication, and command reference for Pinecone.
 

@@ -1,6 +1,6 @@
 # Pinecone Java SDK Guide
 
-> **Prerequisites**: See [AGENTS.md](./AGENTS.md) for universal concepts and setup.
+> **Prerequisites**: See [AGENTS.md](../AGENTS.md) for universal concepts and setup.
 
 This guide provides Java-specific patterns, examples, and best practices for the Pinecone SDK.
 
