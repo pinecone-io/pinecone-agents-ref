@@ -12,6 +12,40 @@ This guide provides Go-specific patterns, examples, and best practices for the P
 go get github.com/pinecone-io/go-pinecone/pinecone
 ```
 
+### Finding the Latest Version
+
+**Check latest version on GitHub:**
+
+- Releases: [https://github.com/pinecone-io/go-pinecone/releases](https://github.com/pinecone-io/go-pinecone/releases)
+- Or via Go: `go list -m -versions github.com/pinecone-io/go-pinecone/pinecone`
+
+**Install latest version:**
+
+```bash
+go get github.com/pinecone-io/go-pinecone/pinecone@latest
+```
+
+**Install specific version:**
+
+```bash
+go get github.com/pinecone-io/go-pinecone/pinecone@v4.1.4  # Replace with desired version
+```
+
+**Check installed version:**
+
+```bash
+go list -m github.com/pinecone-io/go-pinecone/pinecone
+```
+
+**Update dependencies:**
+
+```bash
+go get -u github.com/pinecone-io/go-pinecone/pinecone
+go mod tidy
+```
+
+> **⚠️ Best Practice**: Always use the latest version of the Pinecone SDK unless the user explicitly requests a specific version. Check the latest version using the methods above and update your installation accordingly.
+
 ### Go Imports
 
 ```go

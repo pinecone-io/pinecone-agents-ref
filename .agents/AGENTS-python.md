@@ -12,6 +12,39 @@ This guide provides Python-specific patterns, examples, and best practices for t
 from pinecone import Pinecone
 ```
 
+### Finding the Latest Version
+
+**Check latest version on PyPI:**
+
+- Browse: [https://pypi.org/project/pinecone/](https://pypi.org/project/pinecone/)
+- Or check programmatically: `pip index versions pinecone`
+
+**Install latest version:**
+
+```bash
+pip install pinecone
+```
+
+**Install specific version:**
+
+```bash
+pip install pinecone==7.3.0  # Replace with desired version
+```
+
+**Check installed version:**
+
+```bash
+pip show pinecone
+```
+
+**Upgrade to latest:**
+
+```bash
+pip install --upgrade pinecone
+```
+
+> **⚠️ Best Practice**: Always use the latest version of the Pinecone SDK unless the user explicitly requests a specific version. Check the latest version using the methods above and update your installation accordingly.
+
 ### Environment Configuration
 
 ```python

@@ -14,6 +14,47 @@ npm install @pinecone-database/pinecone
 yarn add @pinecone-database/pinecone
 ```
 
+### Finding the Latest Version
+
+**Check latest version on npm:**
+
+- Browse: [https://www.npmjs.com/package/@pinecone-database/pinecone](https://www.npmjs.com/package/@pinecone-database/pinecone)
+- Or check via CLI: `npm view @pinecone-database/pinecone version`
+
+**Install latest version:**
+
+```bash
+npm install @pinecone-database/pinecone@latest
+# or
+yarn add @pinecone-database/pinecone@latest
+```
+
+**Install specific version:**
+
+```bash
+npm install @pinecone-database/pinecone@6.1.2
+# or
+yarn add @pinecone-database/pinecone@6.1.2
+```
+
+**Check installed version:**
+
+```bash
+npm list @pinecone-database/pinecone
+# or
+yarn list --pattern @pinecone-database/pinecone
+```
+
+**Update to latest:**
+
+```bash
+npm update @pinecone-database/pinecone
+# or
+yarn upgrade @pinecone-database/pinecone
+```
+
+> **⚠️ Best Practice**: Always use the latest version of the Pinecone SDK unless the user explicitly requests a specific version. Check the latest version using the methods above and update your installation accordingly.
+
 ### TypeScript Imports
 
 ```typescript

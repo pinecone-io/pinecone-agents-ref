@@ -6,21 +6,60 @@ This guide provides Java-specific patterns, examples, and best practices for the
 
 ## Installation & Setup
 
+### Finding the Latest Version
+
+**Check latest version on Maven Central:**
+
+- Browse: [https://repo1.maven.org/maven2/io/pinecone/pinecone-client/](https://repo1.maven.org/maven2/io/pinecone/pinecone-client/)
+- Or check via CLI: `curl -s https://repo1.maven.org/maven2/io/pinecone/pinecone-client/maven-metadata.xml`
+
 ### Maven Dependency
+
+**Install latest version:**
 
 ```xml
 <dependency>
     <groupId>io.pinecone</groupId>
     <artifactId>pinecone-client</artifactId>
-    <version>0.7.0</version>
+    <version>5.1.0</version>  <!-- Replace with desired version -->
 </dependency>
 ```
 
 ### Gradle Dependency
 
+**Install specific version:**
+
 ```gradle
-implementation 'io.pinecone:pinecone-client:0.7.0'
+implementation 'io.pinecone:pinecone-client:5.1.0'  // Replace with desired version
 ```
+
+**Using dynamic version (not recommended for production):**
+
+```gradle
+implementation 'io.pinecone:pinecone-client:+'  // Gets latest, but can cause unexpected updates
+// Or with version range
+implementation 'io.pinecone:pinecone-client:[5.1.0,)'  // 5.1.0 or higher
+```
+
+**Check versions available (requires `gradle-versions-plugin`):**
+
+```bash
+# First add plugin to build.gradle:
+# plugins { id 'com.github.ben-manes.versions' version '0.46.0' }
+
+gradle dependencyUpdates
+```
+
+**Or check manually:**
+
+```bash
+# Check dependency version in your project
+gradle dependencies | grep pinecone-client
+
+# Or browse Maven Central directly
+```
+
+> **⚠️ Best Practice**: Always use the latest version of the Pinecone SDK unless the user explicitly requests a specific version. Check the latest version using the methods above and update your dependency configuration accordingly.
 
 ### Java Imports
 
