@@ -26,31 +26,31 @@
 ### Extract Links Only (No Checking)
 
 ```bash
-python3 check_links.py --recursive --skip-check
+python3 utils/check_links.py --recursive --skip-check
 ```
 
 ### Check All Links
 
 ```bash
-python3 check_links.py --recursive
+python3 utils/check_links.py --recursive
 ```
 
 ### Check Specific Files
 
 ```bash
-python3 check_links.py --files AGENTS.md .agents/AGENTS-cli.md
+python3 utils/check_links.py --files AGENTS.md .agents/AGENTS-cli.md
 ```
 
 ### Verbose Output (Show All Checks)
 
 ```bash
-python3 check_links.py --recursive --verbose
+python3 utils/check_links.py --recursive --verbose
 ```
 
 ### Custom Timeout
 
 ```bash
-python3 check_links.py --recursive --timeout 5
+python3 utils/check_links.py --recursive --timeout 5
 ```
 
 ## Command-Line Options
