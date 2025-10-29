@@ -1,6 +1,8 @@
 # Pinecone Agent Reference
 
-This repository contains specialized agent instructions for the Pinecone vector database, designed to be integrated into your project's `AGENTS.md` file for use with AI coding assistants.
+This repository contains specialized agent instructions for the Pinecone vector database, designed to be integrated into your AI coding assistant's configuration file.
+
+[AGENTS.md](https://agents.md/) is an open format used by over 20k open-source projects and is supported by most coding assistants including Cursor, Aider, GitHub Copilot, and many others.
 
 ## What's Included
 
@@ -16,20 +18,27 @@ This repository provides comprehensive Pinecone documentation organized into the
 
 ## Quick Start
 
-Install with three simple commands:
+The general process is to download the latest release, extract the archive, and add the Pinecone section to your assistant's configuration file.
+
+### Most Assistants (Cursor, Aider, GitHub Copilot, etc.)
 
 ```bash
-# 1. Download the latest release
 curl -L -o agents.zip https://github.com/pinecone-io/pinecone-agents-ref/releases/latest/download/agents.zip
-
-# 2. Extract the archive
 unzip agents.zip && rm agents.zip
-
-# 3. Add Pinecone section to AGENTS.md (creates it if it doesn't exist)
 touch AGENTS.md && cat AGENTS-pinecone-snippet.md >> AGENTS.md && rm AGENTS-pinecone-snippet.md
 ```
 
-That's it! Your project now has the `.agents/` folder with all Pinecone documentation and your `AGENTS.md` file has been updated.
+### Claude Code
+
+Claude Code uses `CLAUDE.md` instead of `AGENTS.md`. :
+
+```bash
+curl -L -o agents.zip https://github.com/pinecone-io/pinecone-agents-ref/releases/latest/download/agents.zip
+unzip agents.zip && rm agents.zip
+touch CLAUDE.md && cat AGENTS-pinecone-snippet.md >> CLAUDE.md && rm AGENTS-pinecone-snippet.md
+```
+
+That's it! Your project now has the `.agents/` folder with all Pinecone documentation and your configuration file has been updated.
 
 ### Verify Installation
 
@@ -60,13 +69,11 @@ The third command appends `AGENTS-pinecone-snippet.md` to your `AGENTS.md`. If y
 
 ## Updating
 
-To update to a newer version:
+To update to a newer version, simply download the latest release and extract the archive. Your configuration file (AGENTS.md or CLAUDE.md if using Claude Code) typically doesn't need changes unless the structure changes.
 
 ```bash
-# Download the latest version
 curl -L -o agents.zip https://github.com/pinecone-io/pinecone-agents-ref/releases/latest/download/agents.zip
-rm -rf .agents && unzip agents.zip && rm agents.zip
-# AGENTS.md typically doesn't need changes unless the structure changes
+rm -rf .agents/PINECONE* && unzip agents.zip && rm agents.zip
 ```
 
 ## Usage
