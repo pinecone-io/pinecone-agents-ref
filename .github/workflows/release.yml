@@ -1,0 +1,130 @@
+name: Create Release Archive
+
+on:
+  push:
+    tags:
+      - "v*" # Matches tags like v1.0.0, v2.1.3, etc.
+
+jobs:
+  package-release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Get tag name
+        id: tag
+        run: |
+          TAG_NAME=${GITHUB_REF#refs/tags/}
+          echo "tag_name=${TAG_NAME}" >> $GITHUB_OUTPUT
+          echo "Tag: ${TAG_NAME}"
+
+      - name: Check if release exists
+        id: check_release
+        run: |
+          RELEASE_ID=$(curl -s \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/${{ github.repository }}/releases/tags/${{ steps.tag.outputs.tag_name }}" | jq -r '.id // empty')
+
+          if [ -n "$RELEASE_ID" ]; then
+            echo "release_id=${RELEASE_ID}" >> $GITHUB_OUTPUT
+            echo "release_exists=true" >> $GITHUB_OUTPUT
+            echo "Found existing release: ${RELEASE_ID}"
+          else
+            echo "release_exists=false" >> $GITHUB_OUTPUT
+            echo "Release does not exist, will create it"
+          fi
+
+      - name: Create release if needed
+        id: create_release
+        if: steps.check_release.outputs.release_exists == 'false'
+        run: |
+          RESPONSE=$(curl -s -X POST \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/${{ github.repository }}/releases" \
+            -d "{\"tag_name\":\"${{ steps.tag.outputs.tag_name }}\",\"name\":\"${{ steps.tag.outputs.tag_name }}\",\"draft\":false,\"prerelease\":false}")
+
+          RELEASE_ID=$(echo $RESPONSE | jq -r '.id')
+          UPLOAD_URL=$(echo $RESPONSE | jq -r '.upload_url')
+          echo "release_id=${RELEASE_ID}" >> $GITHUB_OUTPUT
+          echo "upload_url=${UPLOAD_URL}" >> $GITHUB_OUTPUT
+          echo "Created release: ${RELEASE_ID}"
+
+      - name: Get release upload URL
+        id: get_upload_url
+        if: steps.check_release.outputs.release_exists == 'true'
+        run: |
+          UPLOAD_URL=$(curl -s \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/${{ github.repository }}/releases/${{ steps.check_release.outputs.release_id }}" | jq -r '.upload_url')
+          echo "upload_url=${UPLOAD_URL}" >> $GITHUB_OUTPUT
+
+      - name: Set upload URL
+        id: set_upload_url
+        run: |
+          if [ "${{ steps.create_release.outputs.upload_url }}" != "" ]; then
+            echo "upload_url=${{ steps.create_release.outputs.upload_url }}" >> $GITHUB_OUTPUT
+          else
+            echo "upload_url=${{ steps.get_upload_url.outputs.upload_url }}" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create .agents archive
+        run: |
+          # Create a temporary directory for the archive
+          mkdir -p release-package/.agents
+
+          # Copy all files from .agents folder
+          cp -r .agents/* release-package/.agents/
+
+          # Copy the AGENTS-pinecone-snippet.md file for easy integration
+          cp AGENTS-pinecone-snippet.md release-package/
+
+          # Create zip archive
+          cd release-package
+          zip -r ../agents.zip .
+          cd ..
+
+          # Create tar.gz archive (alternative format)
+          cd release-package
+          tar -czf ../agents.tar.gz .
+          cd ..
+
+          # List contents for verification
+          echo "Archive contents:"
+          unzip -l agents.zip
+
+      - name: Upload ZIP archive to release
+        run: |
+          UPLOAD_URL="${{ steps.set_upload_url.outputs.upload_url }}"
+          UPLOAD_URL="${UPLOAD_URL%\{?name,label\}}"
+          curl \
+            -X POST \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/zip" \
+            --data-binary @"agents.zip" \
+            "${UPLOAD_URL}?name=agents.zip"
+
+      - name: Upload TAR.GZ archive to release
+        run: |
+          UPLOAD_URL="${{ steps.set_upload_url.outputs.upload_url }}"
+          UPLOAD_URL="${UPLOAD_URL%\{?name,label\}}"
+          curl \
+            -X POST \
+            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            -H "Content-Type: application/gzip" \
+            --data-binary @"agents.tar.gz" \
+            "${UPLOAD_URL}?name=agents.tar.gz"
+
+      - name: Display release information
+        run: |
+          echo "✅ Release assets created successfully!"
+          echo "📦 agents.zip - ZIP archive containing .agents folder and integration files"
+          echo "📦 agents.tar.gz - TAR.GZ archive containing .agents folder and integration files"
+          echo ""
+          echo "Release tag: ${{ steps.tag.outputs.tag_name }}"
