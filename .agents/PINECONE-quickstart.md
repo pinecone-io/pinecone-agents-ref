@@ -27,10 +27,10 @@ When you are asked to help get started with Pinecone:
 
 ## Language-Specific Quickstarts
 
-- **Python**: See [AGENTS-python.md](./AGENTS-python.md#quickstarts)
-- **TypeScript/Node.js**: See [AGENTS-typescript.md](./AGENTS-typescript.md#quickstarts)
-- **Go**: See [AGENTS-go.md](./AGENTS-go.md#quickstarts)
-- **Java**: See [AGENTS-java.md](./AGENTS-java.md#quickstarts)
+- **Python**: See [PINECONE-python.md](./PINECONE-python.md#quickstarts)
+- **TypeScript/Node.js**: See [PINECONE-typescript.md](./PINECONE-typescript.md#quickstarts)
+- **Go**: See [PINECONE-go.md](./PINECONE-go.md#quickstarts)
+- **Java**: See [PINECONE-java.md](./PINECONE-java.md#quickstarts)
 
 ---
 
@@ -225,10 +225,10 @@ export GROQ_API_KEY="your-groq-key-here"
 
 ### Language Examples
 
-- **Python**: See [AGENTS-python.md - Quick Test](./AGENTS-python.md#quick-test)
-- **TypeScript**: See [AGENTS-typescript.md - Quick Test](./AGENTS-typescript.md#quick-test)
-- **Go**: See [AGENTS-go.md - Quick Test](./AGENTS-go.md#quick-test)
-- **Java**: See [AGENTS-java.md - Quick Test](./AGENTS-java.md#quick-test)
+- **Python**: See [PINECONE-python.md - Quick Test](./PINECONE-python.md#quick-test)
+- **TypeScript**: See [PINECONE-typescript.md - Quick Test](./PINECONE-typescript.md#quick-test)
+- **Go**: See [PINECONE-go.md - Quick Test](./PINECONE-go.md#quick-test)
+- **Java**: See [PINECONE-java.md - Quick Test](./PINECONE-java.md#quick-test)
 
 ### Key Concepts Learned
 
@@ -267,10 +267,10 @@ export GROQ_API_KEY="your-groq-key-here"
 
 See the "Use Case Examples" section in your language guide:
 
-- **Python**: [AGENTS-python.md - Semantic Search](./AGENTS-python.md#semantic-search-system)
-- **TypeScript**: [AGENTS-typescript.md - Semantic Search](./AGENTS-typescript.md#semantic-search-system)
-- **Go**: [AGENTS-go.md - Semantic Search](./AGENTS-go.md#semantic-search-system)
-- **Java**: [AGENTS-java.md - Semantic Search](./AGENTS-java.md#semantic-search-system)
+- **Python**: [PINECONE-python.md - Semantic Search](./PINECONE-python.md#semantic-search-system)
+- **TypeScript**: [PINECONE-typescript.md - Semantic Search](./PINECONE-typescript.md#semantic-search-system)
+- **Go**: [PINECONE-go.md - Semantic Search](./PINECONE-go.md#semantic-search-system)
+- **Java**: [PINECONE-java.md - Semantic Search](./PINECONE-java.md#semantic-search-system)
 
 ---
 
@@ -303,10 +303,10 @@ See the "Use Case Examples" section in your language guide:
 
 See the "Use Case Examples" section in your language guide:
 
-- **Python**: [AGENTS-python.md - RAG System](./AGENTS-python.md#multi-tenant-rag-system)
-- **TypeScript**: [AGENTS-typescript.md - RAG System](./AGENTS-typescript.md#multi-tenant-rag-system)
-- **Go**: [AGENTS-go.md - RAG System](./AGENTS-go.md#multi-tenant-rag-system)
-- **Java**: [AGENTS-java.md - RAG System](./AGENTS-java.md#multi-tenant-rag-system)
+- **Python**: [PINECONE-python.md - RAG System](./PINECONE-python.md#multi-tenant-rag-system)
+- **TypeScript**: [PINECONE-typescript.md - RAG System](./PINECONE-typescript.md#multi-tenant-rag-system)
+- **Go**: [PINECONE-go.md - RAG System](./PINECONE-go.md#multi-tenant-rag-system)
+- **Java**: [PINECONE-java.md - RAG System](./PINECONE-java.md#multi-tenant-rag-system)
 
 ---
 
@@ -338,10 +338,10 @@ See the "Use Case Examples" section in your language guide:
 
 See the "Use Case Examples" section in your language guide:
 
-- **Python**: [AGENTS-python.md - Recommendations](./AGENTS-python.md#recommendation-engine)
-- **TypeScript**: [AGENTS-typescript.md - Recommendations](./AGENTS-typescript.md#recommendation-engine)
-- **Go**: [AGENTS-go.md - Recommendations](./AGENTS-go.md#recommendation-engine)
-- **Java**: [AGENTS-java.md - Recommendations](./AGENTS-java.md#recommendation-engine)
+- **Python**: [PINECONE-python.md - Recommendations](./PINECONE-python.md#recommendation-engine)
+- **TypeScript**: [PINECONE-typescript.md - Recommendations](./PINECONE-typescript.md#recommendation-engine)
+- **Go**: [PINECONE-go.md - Recommendations](./PINECONE-go.md#recommendation-engine)
+- **Java**: [PINECONE-java.md - Recommendations](./PINECONE-java.md#recommendation-engine)
 
 ---
 
@@ -375,7 +375,7 @@ pc index describe --name <index-name>
 pc index delete --name <index-name>
 ```
 
-See [AGENTS-cli.md](./AGENTS-cli.md) for complete CLI reference.
+See [PINECONE-cli.md](./PINECONE-cli.md) for complete CLI reference.
 
 ---
 
@@ -397,7 +397,7 @@ After completing a quickstart:
 | 404 on index operations          | Verify index exists with `pc index list` |
 | Rate limit errors                | Implement exponential backoff retry      |
 
-See [AGENTS.md](../AGENTS.md#quick-troubleshooting) for more troubleshooting tips.
+See [PINECONE.md](./PINECONE.md#quick-troubleshooting) for more troubleshooting tips.
 
 ---
 

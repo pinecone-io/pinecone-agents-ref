@@ -2,7 +2,7 @@
 
 > **Prerequisites**: See [AGENTS.md](../AGENTS.md) for universal concepts and CLI vs SDK guidance.
 >
-> **Getting Started?** See [Quickstart Guide](./AGENTS-quickstart.md) for step-by-step tutorials.
+> **Getting Started?** See [Quickstart Guide](./PINECONE-quickstart.md) for step-by-step tutorials.
 
 This guide provides comprehensive CLI setup, authentication, and command reference for Pinecone.
 
