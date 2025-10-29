@@ -22,20 +22,46 @@ The general process is to download the latest release, extract the archive, and 
 
 ### Most Assistants (Cursor, Aider, GitHub Copilot, etc.)
 
+**Linux/macOS (Bash/Zsh):**
+
 ```bash
 curl -L -o agents.zip https://github.com/pinecone-io/pinecone-agents-ref/releases/latest/download/agents.zip
 unzip agents.zip && rm agents.zip
 touch AGENTS.md && cat AGENTS-pinecone-snippet.md >> AGENTS.md && rm AGENTS-pinecone-snippet.md
 ```
 
+**Windows (PowerShell):**
+
+```powershell
+Invoke-WebRequest -Uri https://github.com/pinecone-io/pinecone-agents-ref/releases/latest/download/agents.zip -OutFile agents.zip
+Expand-Archive -Path agents.zip -DestinationPath . -Force
+Remove-Item agents.zip
+if (-not (Test-Path AGENTS.md)) { New-Item -Path AGENTS.md -ItemType File }
+Add-Content -Path AGENTS.md -Value (Get-Content AGENTS-pinecone-snippet.md)
+Remove-Item AGENTS-pinecone-snippet.md
+```
+
 ### Claude Code
 
-Claude Code uses `CLAUDE.md` instead of `AGENTS.md`. :
+Claude Code uses `CLAUDE.md` instead of `AGENTS.md`.
+
+**Linux/macOS (Bash/Zsh):**
 
 ```bash
 curl -L -o agents.zip https://github.com/pinecone-io/pinecone-agents-ref/releases/latest/download/agents.zip
 unzip agents.zip && rm agents.zip
 touch CLAUDE.md && cat AGENTS-pinecone-snippet.md >> CLAUDE.md && rm AGENTS-pinecone-snippet.md
+```
+
+**Windows (PowerShell):**
+
+```powershell
+Invoke-WebRequest -Uri https://github.com/pinecone-io/pinecone-agents-ref/releases/latest/download/agents.zip -OutFile agents.zip
+Expand-Archive -Path agents.zip -DestinationPath . -Force
+Remove-Item agents.zip
+if (-not (Test-Path CLAUDE.md)) { New-Item -Path CLAUDE.md -ItemType File }
+Add-Content -Path CLAUDE.md -Value (Get-Content AGENTS-pinecone-snippet.md)
+Remove-Item AGENTS-pinecone-snippet.md
 ```
 
 That's it! Your project now has the `.agents/` folder with all Pinecone documentation and your configuration file has been updated.
@@ -69,11 +95,22 @@ The third command appends `AGENTS-pinecone-snippet.md` to your `AGENTS.md`. If y
 
 ## Updating
 
-To update to a newer version, simply download the latest release and extract the archive. Your configuration file (AGENTS.md or CLAUDE.md if using Claude Code) typically doesn't need changes unless the structure changes.
+To update to a newer version, simply download the latest release and extract the archive. Your configuration file (`AGENTS.md` or `CLAUDE.md` if using Claude Code) typically doesn't need changes unless the structure changes.
+
+**Linux/macOS (Bash/Zsh):**
 
 ```bash
 curl -L -o agents.zip https://github.com/pinecone-io/pinecone-agents-ref/releases/latest/download/agents.zip
 rm -rf .agents/PINECONE* && unzip agents.zip && rm agents.zip
+```
+
+**Windows (PowerShell):**
+
+```powershell
+Invoke-WebRequest -Uri https://github.com/pinecone-io/pinecone-agents-ref/releases/latest/download/agents.zip -OutFile agents.zip
+Remove-Item .agents\PINECONE*
+Expand-Archive -Path agents.zip -DestinationPath . -Force
+Remove-Item agents.zip
 ```
 
 ## Usage
