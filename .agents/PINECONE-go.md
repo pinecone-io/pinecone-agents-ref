@@ -6,6 +6,8 @@ This guide provides Go-specific patterns, examples, and best practices for the P
 
 ## Installation & Setup
 
+> **⚠️ IMPORTANT**: See [PINECONE.md](./PINECONE.md#-mandatory-always-use-latest-version) for the mandatory requirement to always use the latest version when creating projects.
+
 ### Go Module Installation
 
 ```bash
@@ -43,8 +45,6 @@ go list -m github.com/pinecone-io/go-pinecone/pinecone
 go get -u github.com/pinecone-io/go-pinecone/pinecone
 go mod tidy
 ```
-
-> **⚠️ Best Practice**: Always use the latest version of the Pinecone SDK unless the user explicitly requests a specific version. Check the latest version using the methods above and update your installation accordingly.
 
 ### Go Imports
 

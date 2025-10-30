@@ -6,6 +6,8 @@ This guide provides TypeScript/Node.js-specific patterns, examples, and best pra
 
 ## Installation & Setup
 
+> **⚠️ IMPORTANT**: See [PINECONE.md](./PINECONE.md#-mandatory-always-use-latest-version) for the mandatory requirement to always use the latest version when creating projects.
+
 ### Package Installation
 
 ```bash
@@ -52,8 +54,6 @@ npm update @pinecone-database/pinecone
 # or
 yarn upgrade @pinecone-database/pinecone
 ```
-
-> **⚠️ Best Practice**: Always use the latest version of the Pinecone SDK unless the user explicitly requests a specific version. Check the latest version using the methods above and update your installation accordingly.
 
 ### TypeScript Imports
 

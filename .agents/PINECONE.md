@@ -54,6 +54,16 @@ Determine the primary programming language by checking for these files:
 > - **SDK**: Check package files or use language-specific verification commands
 > - Only prompt for installation when verification shows it's missing
 
+### ⚠️ MANDATORY: Always Use Latest Version
+
+**REQUIREMENT**: When creating new projects or adding Pinecone dependencies, you MUST:
+
+1. **Check the latest version** using language-specific methods (see Installation & Setup sections in language-specific guides)
+2. **Use the latest version** in dependency files (package.json, requirements.txt, go.mod, pom.xml, etc.)
+3. **Only pin to a specific version** if the user explicitly requests it
+
+**DO NOT** use outdated or example version numbers. Always query for the current latest version before generating dependency files. See language-specific guides below for how to check the latest version for each language.
+
 **ALWAYS use the current SDK:**
 
 - **Python**: `pip install pinecone` (not `pinecone-client`)

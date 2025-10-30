@@ -6,6 +6,8 @@ This guide provides Java-specific patterns, examples, and best practices for the
 
 ## Installation & Setup
 
+> **⚠️ IMPORTANT**: See [PINECONE.md](./PINECONE.md#-mandatory-always-use-latest-version) for the mandatory requirement to always use the latest version when creating projects.
+
 ### Finding the Latest Version
 
 **Check latest version on Maven Central:**
@@ -58,8 +60,6 @@ gradle dependencies | grep pinecone-client
 
 # Or browse Maven Central directly
 ```
-
-> **⚠️ Best Practice**: Always use the latest version of the Pinecone SDK unless the user explicitly requests a specific version. Check the latest version using the methods above and update your dependency configuration accordingly.
 
 ### Java Imports
 

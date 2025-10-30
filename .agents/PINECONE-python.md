@@ -6,6 +6,8 @@ This guide provides Python-specific patterns, examples, and best practices for t
 
 ## Installation & Setup
 
+> **⚠️ IMPORTANT**: See [PINECONE.md](./PINECONE.md#-mandatory-always-use-latest-version) for the mandatory requirement to always use the latest version when creating projects.
+
 ### Current API (2025)
 
 ```python
@@ -43,7 +45,42 @@ pip show pinecone
 pip install --upgrade pinecone
 ```
 
-> **⚠️ Best Practice**: Always use the latest version of the Pinecone SDK unless the user explicitly requests a specific version. Check the latest version using the methods above and update your installation accordingly.
+### Dependency Management
+
+**⚠️ CRITICAL - Package Name**: Always use `pinecone` (NOT `pinecone-client`). The `pinecone-client` package is deprecated and will cause runtime errors.
+
+**requirements.txt:**
+
+```txt
+pinecone
+```
+
+**pyproject.toml (PEP 621):**
+
+```toml
+[project]
+dependencies = ["pinecone"]
+```
+
+**pyproject.toml (Poetry):**
+
+```toml
+[tool.poetry.dependencies]
+pinecone = "^7.0.0"
+```
+
+**setup.py:**
+
+```python
+install_requires=["pinecone"]
+```
+
+**Pipfile (pipenv):**
+
+```toml
+[packages]
+pinecone = "*"
+```
 
 ### Environment Configuration
 
