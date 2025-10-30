@@ -97,10 +97,6 @@ Determine the primary programming language by checking for these files:
 
 For detailed CLI installation, authentication, and command reference, see [PINECONE-cli.md](./PINECONE-cli.md).
 
-## Index Creation
-
-> **⚠️ Use CLI (`pc index create`), NOT SDK in application code. See [PINECONE-cli.md](./PINECONE-cli.md) for detailed commands.**
-
 ### Available embedding models (current)
 
 - `llama-text-embed-v2`: High-performance, configurable dimensions, recommended for most use cases
