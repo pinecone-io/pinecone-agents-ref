@@ -70,26 +70,95 @@ def check_url(url: str, timeout: int = 10, allow_redirects: bool = True) -> Tupl
     """
     Check if URL is accessible.
     Returns: (is_valid, status_code, error_message)
+    Uses GET request to check content for false positives (pages that return 200 but show 404).
     """
     try:
+        headers = {'User-Agent': 'Mozilla/5.0 (compatible; LinkChecker/1.0)'}
+        
         if USE_REQUESTS:
-            response = requests.head(
+            # Use GET instead of HEAD to check page content for false positives
+            response = requests.get(
                 url,
                 timeout=timeout,
                 allow_redirects=allow_redirects,
-                headers={'User-Agent': 'Mozilla/5.0 (compatible; LinkChecker/1.0)'}
+                headers=headers
             )
             status_code = response.status_code
+            
+            # Check if page is actually valid (not a 404 page with 200 status)
             is_valid = status_code < 400
-            error_message = f"{status_code} {response.reason}" if not is_valid else ""
+            if is_valid and status_code == 200:
+                # Check for common 404 indicators in HTML content
+                content_lower = response.text.lower()
+                
+                # Extract title tag content more reliably
+                title_match = None
+                title_pattern = r'<title[^>]*>(.*?)</title>'
+                title_matches = re.findall(title_pattern, content_lower, re.DOTALL | re.IGNORECASE)
+                if title_matches:
+                    title_text = title_matches[0].strip()
+                    # Check for various 404 indicators in title
+                    if any(phrase in title_text for phrase in [
+                        'page not found',
+                        'not found',
+                        '404',
+                        'page does not exist',
+                        'couldn\'t find the page',
+                        'we couldn\'t find'
+                    ]):
+                        is_valid = False
+                        error_message = f"200 (but page shows '{title_matches[0].strip()}' in title)"
+                    else:
+                        error_message = ""
+                else:
+                    # No title tag found, check body content for 404 indicators
+                    if 'page not found' in content_lower[:5000] or '404' in content_lower[:5000]:
+                        is_valid = False
+                        error_message = "200 (but page content suggests 404)"
+                    else:
+                        error_message = ""
+            else:
+                error_message = f"{status_code} {response.reason}" if not is_valid else ""
         else:
-            request = urllib.request.Request(url, method='HEAD')
-            request.add_header('User-Agent', 'Mozilla/5.0 (compatible; LinkChecker/1.0)')
+            # Fallback to urllib - use GET to check content
+            request = urllib.request.Request(url, headers=headers)
             try:
                 with urllib.request.urlopen(request, timeout=timeout) as response:
                     status_code = response.status
                     is_valid = status_code < 400
-                    error_message = f"{status_code}" if not is_valid else ""
+                    
+                    # For 200 status, read content to check for false positives
+                    if is_valid and status_code == 200:
+                        content = response.read().decode('utf-8', errors='ignore').lower()
+                        
+                        # Extract title tag content more reliably
+                        title_match = None
+                        title_pattern = r'<title[^>]*>(.*?)</title>'
+                        title_matches = re.findall(title_pattern, content, re.DOTALL | re.IGNORECASE)
+                        if title_matches:
+                            title_text = title_matches[0].strip()
+                            # Check for various 404 indicators in title
+                            if any(phrase in title_text for phrase in [
+                                'page not found',
+                                'not found',
+                                '404',
+                                'page does not exist',
+                                'couldn\'t find the page',
+                                'we couldn\'t find'
+                            ]):
+                                is_valid = False
+                                error_message = f"200 (but page shows '{title_matches[0].strip()}' in title)"
+                            else:
+                                error_message = ""
+                        else:
+                            # No title tag found, check body content for 404 indicators
+                            if 'page not found' in content[:5000] or '404' in content[:5000]:
+                                is_valid = False
+                                error_message = "200 (but page content suggests 404)"
+                            else:
+                                error_message = ""
+                    else:
+                        error_message = f"{status_code}" if not is_valid else ""
             except urllib.error.HTTPError as e:
                 status_code = e.code
                 is_valid = status_code < 400
