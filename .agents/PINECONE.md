@@ -32,6 +32,7 @@ Based on what the user is asking, consult these guides:
 ### Universal Concepts
 
 - **Use this file** for CLI vs SDK guidance, common mistakes, constraints, error handling
+- **Troubleshooting** → [PINECONE-troubleshooting.md](./PINECONE-troubleshooting.md)
 - **Language-specific info** → See language-specific files above
 
 ## Language Detection
@@ -217,16 +218,20 @@ Build a multi-tenant RAG (Retrieval-Augmented Generation) system that retrieves 
 
 Build a recommendation engine that suggests similar items based on semantic similarity. Ideal for e-commerce, content platforms, and user personalization systems.
 
-## Quick Troubleshooting
+## Troubleshooting
 
-| Issue                                | Solution                                                     |
-| ------------------------------------ | ------------------------------------------------------------ |
-| `ModuleNotFoundError: pinecone.grpc` | Wrong SDK - reinstall with correct package                   |
-| `Metadata too large` error           | Check 40KB limit, flatten nested objects                     |
-| `Batch too large` error              | Reduce to 96 records (text) or 1000 (vectors)                |
-| Search returns no results            | Check namespace, wait for indexing (~5s), verify data exists |
-| Rate limit (429) errors              | Implement exponential backoff, reduce request rate           |
-| Nested metadata error                | Flatten all metadata - no nested objects allowed             |
+For comprehensive troubleshooting guidance, see [PINECONE-troubleshooting.md](./PINECONE-troubleshooting.md).
+
+### Quick Reference
+
+| Issue                      | Solution                                               | See Guide                                                    |
+| -------------------------- | ------------------------------------------------------ | ------------------------------------------------------------ |
+| `Metadata too large` error | Check 40KB limit, flatten nested objects               | [PINECONE-troubleshooting.md](./PINECONE-troubleshooting.md) |
+| `Batch too large` error    | Reduce to 96 records (text) or 1000 (vectors)          | [PINECONE-troubleshooting.md](./PINECONE-troubleshooting.md) |
+| Search returns no results  | Check namespace, wait for indexing, verify data exists | [PINECONE-troubleshooting.md](./PINECONE-troubleshooting.md) |
+| Rate limit (429) errors    | Implement exponential backoff, reduce request rate     | [PINECONE-troubleshooting.md](./PINECONE-troubleshooting.md) |
+| Nested metadata error      | Flatten all metadata - no nested objects allowed       | [PINECONE-troubleshooting.md](./PINECONE-troubleshooting.md) |
+| Language-specific errors   | See language-specific troubleshooting sections         | [Language guides](#choosing-the-right-guide)                 |
 
 ## Official Documentation Resources
 

@@ -390,14 +390,16 @@ After completing a quickstart:
 
 ## Troubleshooting
 
-| Issue                            | Solution                                 |
-| -------------------------------- | ---------------------------------------- |
-| `ModuleNotFoundError` or similar | Reinstall SDK with latest version        |
-| Search returns no results        | Check namespace, wait ~5s after upsert   |
-| 404 on index operations          | Verify index exists with `pc index list` |
-| Rate limit errors                | Implement exponential backoff retry      |
+For comprehensive troubleshooting guidance, see [PINECONE-troubleshooting.md](./PINECONE-troubleshooting.md).
 
-See [PINECONE.md](./PINECONE.md#quick-troubleshooting) for more troubleshooting tips.
+### Quick Reference
+
+| Issue                            | Solution                                 | See Guide                              |
+| -------------------------------- | ---------------------------------------- | -------------------------------------- |
+| `ModuleNotFoundError` or similar | Reinstall SDK with latest version        | [Language-specific guides](#language-specific-quickstarts) |
+| Search returns no results        | Check namespace, wait ~5s after upsert   | [PINECONE-troubleshooting.md](./PINECONE-troubleshooting.md) |
+| 404 on index operations          | Verify index exists with `pc index list` | [PINECONE-troubleshooting.md](./PINECONE-troubleshooting.md) |
+| Rate limit errors                | Implement exponential backoff retry      | [PINECONE-troubleshooting.md](./PINECONE-troubleshooting.md) |
 
 ---
 
