@@ -66,6 +66,15 @@ Remove-Item AGENTS-pinecone-snippet.md
 
 That's it! Your project now has the `.agents/` folder with all Pinecone documentation and your configuration file has been updated.
 
+### Important: Allow Re-indexing
+
+Many coding assistants need to re-index your codebase to recognize the new `.agents/` folder and configuration file. Before using Pinecone-related features, either:
+
+- **Wait a few moments** for automatic re-indexing to complete, or
+- **Manually trigger a re-index** (if your assistant provides this option)
+
+If you start using Pinecone features immediately after installation, your assistant may not yet have access to the Pinecone documentation. Once re-indexing is complete, your assistant will automatically reference the `.agents/PINECONE.md` files when you ask questions about Pinecone.
+
 ### Verify Installation
 
 After running the commands above, you should have:
