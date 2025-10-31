@@ -99,6 +99,64 @@ class PineconeClient {
 }
 ```
 
+## 🛡️ TypeScript Types & Type Safety
+
+When working with the Pinecone SDK, proper type handling prevents runtime errors:
+
+### Search Result Field Typing
+
+Search results return `hit.fields` as a generic object. Always cast to a typed structure:
+
+```typescript
+// ❌ WRONG - TypeScript error: Property 'content' does not exist on type 'object'
+for (const hit of results.result.hits) {
+  console.log(hit.fields.content); // Compile error!
+}
+
+// ✅ CORRECT - Use type casting with Record<string, any>
+for (const hit of results.result.hits) {
+  const fields = hit.fields as Record<string, any>;
+  const content = String(fields?.content ?? "");
+  const category = String(fields?.category ?? "unknown");
+}
+
+// ✅ BETTER - Define an interface for your records
+interface Document {
+  content: string;
+  category: string;
+}
+
+for (const hit of results.result.hits) {
+  const doc = hit.fields as unknown as Document;
+  console.log(doc.content, doc.category);
+}
+```
+
+### Complete Search Hit Interface
+
+```typescript
+interface SearchHit {
+  _id: string; // Record ID
+  _score: number; // Relevance score (0-1 range)
+  fields: Record<string, any>; // Your custom fields
+  metadata?: Record<string, any>; // Optional metadata
+}
+
+interface SearchResults {
+  result: {
+    hits: SearchHit[];
+    matches?: number;
+  };
+}
+```
+
+### Best Practices for Type Safety
+
+1. **Always cast `hit.fields`**: Use `as Record<string, any>` or define a proper interface
+2. **Use optional chaining**: `fields?.fieldName ?? defaultValue`
+3. **Convert to strings**: `String(value)` when building output
+4. **Define record interfaces**: Match your actual record structure for IDE autocomplete
+
 ## Quickstarts
 
 ### Quick Test
@@ -126,106 +184,69 @@ const pc = new Pinecone({ apiKey });
 
 const records = [
   {
-    id: "rec1",
-    values: [0.1, 0.2, 0.3],
-    metadata: {
-      content:
-        "The Eiffel Tower was completed in 1889 and stands in Paris, France.",
-      category: "history",
-    },
+    _id: "rec1",
+    content:
+      "The Eiffel Tower was completed in 1889 and stands in Paris, France.",
+    category: "history",
   },
   {
-    id: "rec2",
-    values: [0.4, 0.5, 0.6],
-    metadata: {
-      content: "Photosynthesis allows plants to convert sunlight into energy.",
-      category: "science",
-    },
+    _id: "rec2",
+    content: "Photosynthesis allows plants to convert sunlight into energy.",
+    category: "science",
   },
   {
-    id: "rec5",
-    values: [0.7, 0.8, 0.9],
-    metadata: {
-      content:
-        "Shakespeare wrote many famous plays, including Hamlet and Macbeth.",
-      category: "literature",
-    },
+    _id: "rec5",
+    content:
+      "Shakespeare wrote many famous plays, including Hamlet and Macbeth.",
+    category: "literature",
   },
   {
-    id: "rec7",
-    values: [0.2, 0.3, 0.4],
-    metadata: {
-      content:
-        "The Great Wall of China was built to protect against invasions.",
-      category: "history",
-    },
+    _id: "rec7",
+    content: "The Great Wall of China was built to protect against invasions.",
+    category: "history",
   },
   {
-    id: "rec15",
-    values: [0.5, 0.6, 0.7],
-    metadata: {
-      content: "Leonardo da Vinci painted the Mona Lisa.",
-      category: "art",
-    },
+    _id: "rec15",
+    content: "Leonardo da Vinci painted the Mona Lisa.",
+    category: "art",
   },
   {
-    id: "rec17",
-    values: [0.8, 0.9, 0.1],
-    metadata: {
-      content:
-        "The Pyramids of Giza are among the Seven Wonders of the Ancient World.",
-      category: "history",
-    },
+    _id: "rec17",
+    content:
+      "The Pyramids of Giza are among the Seven Wonders of the Ancient World.",
+    category: "history",
   },
   {
-    id: "rec21",
-    values: [0.3, 0.4, 0.5],
-    metadata: {
-      content:
-        "The Statue of Liberty was a gift from France to the United States.",
-      category: "history",
-    },
+    _id: "rec21",
+    content:
+      "The Statue of Liberty was a gift from France to the United States.",
+    category: "history",
   },
   {
-    id: "rec26",
-    values: [0.6, 0.7, 0.8],
-    metadata: {
-      content: "Rome was once the center of a vast empire.",
-      category: "history",
-    },
+    _id: "rec26",
+    content: "Rome was once the center of a vast empire.",
+    category: "history",
   },
   {
-    id: "rec33",
-    values: [0.9, 0.1, 0.2],
-    metadata: {
-      content: "The violin is a string instrument commonly used in orchestras.",
-      category: "music",
-    },
+    _id: "rec33",
+    content: "The violin is a string instrument commonly used in orchestras.",
+    category: "music",
   },
   {
-    id: "rec38",
-    values: [0.4, 0.5, 0.6],
-    metadata: {
-      content: "The Taj Mahal is a mausoleum built by Emperor Shah Jahan.",
-      category: "history",
-    },
+    _id: "rec38",
+    content: "The Taj Mahal is a mausoleum built by Emperor Shah Jahan.",
+    category: "history",
   },
   {
-    id: "rec48",
-    values: [0.7, 0.8, 0.9],
-    metadata: {
-      content: "Vincent van Gogh painted Starry Night.",
-      category: "art",
-    },
+    _id: "rec48",
+    content: "Vincent van Gogh painted Starry Night.",
+    category: "art",
   },
   {
-    id: "rec50",
-    values: [0.1, 0.2, 0.3],
-    metadata: {
-      content:
-        "Renewable energy sources include wind, solar, and hydroelectric power.",
-      category: "energy",
-    },
+    _id: "rec50",
+    content:
+      "Renewable energy sources include wind, solar, and hydroelectric power.",
+    category: "energy",
   },
 ];
 
@@ -233,7 +254,7 @@ const records = [
 const denseIndex = pc.index("agentic-quickstart-test");
 
 // Upsert the records into a namespace
-await denseIndex.namespace("example-namespace").upsert(records);
+await denseIndex.namespace("example-namespace").upsertRecords(records);
 ```
 
 3. **Search with reranking:**
@@ -250,21 +271,35 @@ console.log(stats);
 const query = "Famous historical structures and monuments";
 
 // Search the dense index and rerank results
-const rerankedResults = await denseIndex.namespace("example-namespace").query({
-  vector: query,
-  topK: 10,
-  includeMetadata: true,
-  includeValues: false,
-});
+const rerankedResults = await denseIndex
+  .namespace("example-namespace")
+  .searchRecords({
+    query: {
+      topK: 10,
+      inputs: {
+        text: query,
+      },
+    },
+    rerank: {
+      model: "bge-reranker-v2-m3",
+      topN: 10,
+      rankFields: ["content"],
+    },
+  });
 
-// Print the reranked results
-rerankedResults.matches?.forEach((hit) => {
+// Print the reranked results with proper type casting
+for (const hit of rerankedResults.result.hits) {
+  const fields = hit.fields as Record<string, any>;
+  const category = String(fields?.category ?? "unknown");
+  const content = String(fields?.content ?? "");
   console.log(
-    `id: ${hit.id}, score: ${hit.score?.toFixed(2)}, text: ${
-      hit.metadata?.content
-    }, category: ${hit.metadata?.category}`
+    `id: ${hit._id.padEnd(5)} | score: ${hit._score
+      .toFixed(2)
+      .padEnd(5)} | category: ${category.padEnd(
+      10
+    )} | text: ${content.substring(0, 50)}`
   );
-});
+}
 ```
 
 ## Data Operations
@@ -272,53 +307,45 @@ rerankedResults.matches?.forEach((hit) => {
 ### Upserting Records
 
 ```typescript
-// Indexes with integrated embeddings
+// Indexes with integrated embeddings - use text records directly
 const records = [
   {
-    id: "doc1",
-    values: [0.1, 0.2, 0.3], // vector values
-    metadata: {
-      content: "Your text content here",
-      category: "documentation",
-      created_at: "2025-01-01",
-      priority: "high",
-    },
+    _id: "doc1",
+    content: "Your text content here", // must match field_map
+    category: "documentation",
+    created_at: "2025-01-01",
+    priority: "high",
   },
 ];
 
 // Always use namespaces
 const namespace = "user_123"; // e.g., "knowledge_base", "session_456"
-await index.namespace(namespace).upsert(records);
+await index.namespace(namespace).upsertRecords(records);
 ```
 
 ### Updating Records
 
 ```typescript
-// Update existing records (use same upsert operation with existing IDs)
+// Update existing records (use same upsertRecords operation with existing IDs)
 const updatedRecords = [
   {
-    id: "doc1", // existing record ID
-    values: [0.4, 0.5, 0.6],
-    metadata: {
-      content: "Updated content here",
-      category: "updated_docs", // can change metadata
-      last_modified: "2025-01-15",
-    },
+    _id: "doc1", // existing record ID
+    content: "Updated content here",
+    category: "updated_docs", // can change fields
+    last_modified: "2025-01-15",
   },
 ];
 
 // Partial updates - only changed fields need to be included
 const partialUpdate = [
   {
-    id: "doc1",
-    metadata: {
-      category: "urgent", // only updating category field
-      priority: "high", // adding new field
-    },
+    _id: "doc1",
+    category: "urgent", // only updating category field
+    priority: "high", // adding new field
   },
 ];
 
-await index.namespace(namespace).upsert(updatedRecords);
+await index.namespace(namespace).upsertRecords(updatedRecords);
 ```
 
 ### Fetching Records
@@ -326,23 +353,31 @@ await index.namespace(namespace).upsert(updatedRecords);
 ```typescript
 // Fetch single record
 const result = await index.namespace(namespace).fetch(["doc1"]);
-if (result.vectors) {
-  const record = result.vectors["doc1"];
-  console.log(`Content: ${record.metadata?.content}`);
-  console.log(`Metadata: ${JSON.stringify(record.metadata)}`);
+if (result.records && result.records["doc1"]) {
+  const record = result.records["doc1"];
+  const fields = record.fields as Record<string, any>;
+  console.log(`Content: ${fields?.content}`);
+  console.log(`Category: ${fields?.category}`);
 }
 
 // Fetch multiple records
-const result = await index.namespace(namespace).fetch(["doc1", "doc2", "doc3"]);
-Object.entries(result.vectors || {}).forEach(([recordId, record]) => {
-  console.log(`ID: ${recordId}, Content: ${record.metadata?.content}`);
-});
+const multiResult = await index
+  .namespace(namespace)
+  .fetch(["doc1", "doc2", "doc3"]);
+for (const [recordId, record] of Object.entries(multiResult.records || {})) {
+  const fields = record.fields as Record<string, any>;
+  console.log(`ID: ${recordId}, Content: ${fields?.content}`);
+}
 
 // Fetch with error handling
-async function safeFetch(index: any, namespace: string, ids: string[]) {
+async function safeFetch(
+  index: any,
+  namespace: string,
+  ids: string[]
+): Promise<Record<string, any>> {
   try {
     const result = await index.namespace(namespace).fetch(ids);
-    return result.vectors;
+    return result.records || {};
   } catch (error) {
     console.error("Fetch failed:", error);
     return {};
@@ -363,15 +398,15 @@ async function listAllIds(
   let paginationToken: string | undefined;
 
   while (true) {
-    const result = await index.namespace(namespace).list({
-      prefix,
+    const result = await index.namespace(namespace).listPaginated({
+      prefix: prefix, // filter by ID prefix
       limit: 1000,
-      paginationToken,
+      paginationToken: paginationToken,
     });
 
-    allIds.push(...(result.vectors?.map((record: any) => record.id) || []));
+    allIds.push(...result.vectors.map((record: any) => record.id));
 
-    if (!result.pagination?.next) {
+    if (!result.pagination || !result.pagination.next) {
       break;
     }
     paginationToken = result.pagination.next;
@@ -397,15 +432,19 @@ async function searchWithRerank(
   topK: number = 5
 ) {
   // Standard search pattern - always rerank for production
-  const results = await index.namespace(namespace).query({
-    vector: queryText,
-    topK: topK * 2, // more candidates for reranking
-    includeMetadata: true,
-    includeValues: false,
+  const results = await index.namespace(namespace).searchRecords({
+    query: {
+      topK: topK * 2, // more candidates for reranking
+      inputs: {
+        text: queryText, // must match index config
+      },
+    },
+    rerank: {
+      model: "bge-reranker-v2-m3",
+      topN: topK,
+      rankFields: ["content"],
+    },
   });
-
-  // Note: Reranking would need to be implemented separately
-  // or using Pinecone's hosted reranking features
   return results;
 }
 ```
@@ -421,11 +460,11 @@ async function lexicalSearch(
   topK: number = 5
 ) {
   // Keyword-based search using sparse embeddings
-  const results = await index.namespace(namespace).query({
-    vector: queryText,
-    topK: topK,
-    includeMetadata: true,
-    includeValues: false,
+  const results = await index.namespace(namespace).searchRecords({
+    query: {
+      inputs: { text: queryText },
+      topK: topK,
+    },
   });
   return results;
 }
@@ -439,15 +478,33 @@ async function lexicalSearchWithRequiredTerms(
   topK: number = 5
 ) {
   // Results must contain specific required words
-  const results = await index.namespace(namespace).query({
-    vector: queryText,
-    topK: topK,
-    includeMetadata: true,
-    includeValues: false,
-    filter: {
-      $in: {
-        content: requiredTerms,
-      },
+  const results = await index.namespace(namespace).searchRecords({
+    query: {
+      inputs: { text: queryText },
+      topK: topK,
+      matchTerms: requiredTerms, // results must contain these terms
+    },
+  });
+  return results;
+}
+
+// Lexical search with reranking
+async function lexicalSearchWithRerank(
+  index: any,
+  namespace: string,
+  queryText: string,
+  topK: number = 5
+) {
+  // Lexical search with reranking for better relevance
+  const results = await index.namespace(namespace).searchRecords({
+    query: {
+      inputs: { text: queryText },
+      topK: topK * 2, // get more candidates for reranking
+    },
+    rerank: {
+      model: "bge-reranker-v2-m3",
+      topN: topK,
+      rankFields: ["content"],
     },
   });
   return results;
@@ -461,7 +518,7 @@ async function lexicalSearchWithRequiredTerms(
 const filterCriteria = { category: "documentation" };
 
 // Complex filters
-const filterCriteria = {
+const complexFilter = {
   $and: [
     { category: { $in: ["docs", "tutorial"] } },
     { priority: { $ne: "low" } },
@@ -469,35 +526,38 @@ const filterCriteria = {
   ],
 };
 
-const results = await index.namespace(namespace).query({
-  vector: queryText,
-  topK: 10,
-  includeMetadata: true,
-  includeValues: false,
-  filter: filterCriteria,
+const results = await index.namespace(namespace).searchRecords({
+  query: {
+    topK: 10,
+    inputs: { text: queryText },
+    filter: filterCriteria, // Filter goes inside query object
+  },
 });
 
-// Search without filters - omit the filter property
-const results = await index.namespace(namespace).query({
-  vector: queryText,
-  topK: 10,
-  includeMetadata: true,
-  includeValues: false,
+// Search without filters - omit the filter key entirely
+const simpleResults = await index.namespace(namespace).searchRecords({
+  query: {
+    topK: 10,
+    inputs: { text: queryText },
+    // No filter key at all
+  },
 });
 
-// Dynamic filter pattern - conditionally add filter
+// Dynamic filter pattern - conditionally add filter to query object
 const queryOptions: any = {
-  vector: queryText,
   topK: 10,
-  includeMetadata: true,
-  includeValues: false,
+  inputs: { text: queryText },
 };
-
 if (hasFilters) {
+  // Only add filter if it exists
   queryOptions.filter = { category: { $eq: "docs" } };
 }
 
-const results = await index.namespace(namespace).query(queryOptions);
+const dynamicResults = await index.namespace(namespace).searchRecords({
+  query: queryOptions,
+});
+
+// Filter operators: $eq, $ne, $gt, $gte, $lt, $lte, $in, $nin, $exists, $and, $or
 ```
 
 ## Error Handling (Production)
@@ -532,7 +592,9 @@ async function exponentialBackoffRetry<T>(
 }
 
 // Usage
-await exponentialBackoffRetry(() => index.namespace(namespace).upsert(records));
+await exponentialBackoffRetry(() =>
+  index.namespace(namespace).upsertRecords(records)
+);
 ```
 
 ## Batch Processing
@@ -547,7 +609,7 @@ async function batchUpsert(
   for (let i = 0; i < records.length; i += batchSize) {
     const batch = records.slice(i, i + batchSize);
     await exponentialBackoffRetry(() =>
-      index.namespace(namespace).upsert(batch)
+      index.namespace(namespace).upsertRecords(batch)
     );
     await new Promise((resolve) => setTimeout(resolve, 100)); // Rate limiting
   }
@@ -570,7 +632,7 @@ if (indexExists) {
 
 // Get stats (for monitoring/metrics)
 const stats = await index.describeIndexStats();
-console.log(`Total vectors: ${stats.totalVectorCount}`);
+console.log(`Total records: ${stats.totalRecordCount}`);
 console.log(`Namespaces: ${Object.keys(stats.namespaces || {})}`);
 ```
 
@@ -579,23 +641,24 @@ console.log(`Namespaces: ${Object.keys(stats.namespaces || {})}`);
 ```typescript
 // Fetch records
 const result = await index.namespace("ns").fetch(["doc1", "doc2"]);
-Object.entries(result.vectors || {}).forEach(([recordId, record]) => {
-  console.log(`${recordId}: ${record.metadata?.content}`);
-});
+for (const [recordId, record] of Object.entries(result.records || {})) {
+  const fields = record.fields as Record<string, any>;
+  console.log(`${recordId}: ${fields?.content}`);
+}
 
 // List all IDs (paginated)
 const allIds: string[] = [];
 let paginationToken: string | undefined;
 
 while (true) {
-  const result = await index.namespace("ns").list({
+  const result = await index.namespace("ns").listPaginated({
     limit: 1000,
     paginationToken,
   });
 
-  allIds.push(...(result.vectors?.map((record) => record.id) || []));
+  allIds.push(...result.vectors.map((record: any) => record.id));
 
-  if (!result.pagination?.next) {
+  if (!result.pagination || !result.pagination.next) {
     break;
   }
   paginationToken = result.pagination.next;
@@ -627,21 +690,28 @@ const namespace = "chat_history";
 ### Type Definitions
 
 ```typescript
+// Record structure for integrated embeddings
 interface PineconeRecord {
-  id: string;
-  values: number[];
-  metadata?: Record<string, any>;
+  _id: string;
+  [key: string]: any; // Your custom fields (e.g., content, category)
 }
 
-interface SearchResult {
-  matches?: Array<{
-    id: string;
-    score?: number;
-    metadata?: Record<string, any>;
-    values?: number[];
-  }>;
+// Search result structure
+interface SearchHit {
+  _id: string; // Record ID
+  _score: number; // Relevance score (0-1 range)
+  fields: Record<string, any>; // Your custom fields
+  metadata?: Record<string, any>; // Optional metadata
 }
 
+interface SearchResults {
+  result: {
+    hits: SearchHit[];
+    matches?: number;
+  };
+}
+
+// Filter criteria
 interface FilterCriteria {
   [key: string]: any;
   $and?: FilterCriteria[];
@@ -695,17 +765,22 @@ function buildSemanticSearchSystem() {
     topK: number = 5
   ) {
     const queryOptions: any = {
-      vector: query,
       topK: topK * 2,
-      includeMetadata: true,
-      includeValues: false,
+      inputs: { text: query },
     };
 
     if (categoryFilter) {
       queryOptions.filter = { category: { $eq: categoryFilter } };
     }
 
-    const results = await index.namespace("knowledge_base").query(queryOptions);
+    const results = await index.namespace("knowledge_base").searchRecords({
+      query: queryOptions,
+      rerank: {
+        model: "bge-reranker-v2-m3",
+        topN: topK,
+        rankFields: ["content"],
+      },
+    });
 
     return results;
   };
@@ -725,19 +800,26 @@ function buildRagSystem() {
     // Ensure namespace isolation
     const namespace = `user_${userId}`;
 
-    // Search only user's namespace
-    const results = await index.namespace(namespace).query({
-      vector: query,
-      topK: topK * 2,
-      includeMetadata: true,
-      includeValues: false,
+    // Search only user's namespace with reranking
+    const results = await index.namespace(namespace).searchRecords({
+      query: {
+        topK: topK * 2,
+        inputs: { text: query },
+      },
+      rerank: {
+        model: "bge-reranker-v2-m3",
+        topN: topK,
+        rankFields: ["content"],
+      },
     });
 
-    // Construct context for LLM
-    const context =
-      results.matches
-        ?.map((hit) => `Document ${hit.id}: ${hit.metadata?.content}`)
-        .join("\n") || "";
+    // Construct context for LLM with proper type casting
+    const context = results.result.hits
+      .map((hit) => {
+        const fields = hit.fields as Record<string, any>;
+        return `Document ${hit._id}: ${String(fields?.content ?? "")}`;
+      })
+      .join("\n");
 
     return context;
   };
@@ -754,26 +836,290 @@ function buildRecommendationEngine() {
     categoryFilter?: string,
     topK: number = 10
   ) {
-    // Get similar products
-    const results = await index.namespace("products").query({
-      vector: `product_${productId}`,
+    const queryOptions: any = {
       topK: topK * 2,
-      includeMetadata: true,
-      includeValues: false,
-    });
+      inputs: { text: `product description for ${productId}` },
+    };
 
     // Apply category filtering if specified
     if (categoryFilter) {
-      const filteredResults = results.matches?.filter(
-        (hit) => hit.metadata?.category === categoryFilter
-      );
-      return filteredResults?.slice(0, topK) || [];
+      queryOptions.filter = { category: { $eq: categoryFilter } };
     }
 
-    return results.matches?.slice(0, topK) || [];
+    // Get similar products with reranking
+    const results = await index.namespace("products").searchRecords({
+      query: queryOptions,
+      rerank: {
+        model: "bge-reranker-v2-m3",
+        topN: topK,
+        rankFields: ["content"],
+      },
+    });
+
+    return results.result.hits;
   };
 }
 ```
+
+## 🚨 Common Mistakes (Must Avoid)
+
+### 1. **Nested Metadata** (will cause API errors)
+
+```typescript
+// ❌ WRONG - nested objects not allowed
+const badRecord = {
+  _id: "doc1",
+  user: { name: "John", id: 123 }, // Nested
+  tags: [{ type: "urgent" }], // Nested in list
+};
+
+// ✅ CORRECT - flat structure only
+const goodRecord = {
+  _id: "doc1",
+  user_name: "John",
+  user_id: 123,
+  tags: ["urgent", "important"], // String lists OK
+};
+```
+
+### 2. **Batch Size Limits** (will cause API errors)
+
+```typescript
+// Text records: MAX 96 per batch, 2MB total
+// Vector records: MAX 1000 per batch, 2MB total
+
+// ✅ CORRECT - respect limits
+for (let i = 0; i < records.length; i += 96) {
+  const batch = records.slice(i, i + 96);
+  await index.namespace(namespace).upsertRecords(batch);
+}
+```
+
+### 3. **Missing Namespaces** (causes data isolation issues)
+
+```typescript
+// ❌ WRONG - no namespace
+await index.upsertRecords(records); // Old API pattern
+
+// ✅ CORRECT - always use namespaces
+await index.namespace("user_123").upsertRecords(records);
+await index.namespace("user_123").searchRecords(params);
+await index.namespace("user_123").deleteMany(["doc1"]);
+```
+
+### 4. **Skipping Reranking** (reduces search quality)
+
+```typescript
+// ⚠️ OK but not optimal
+const results = await index.namespace("ns").searchRecords({
+  query: { topK: 5, inputs: { text: "query" } },
+});
+
+// ✅ BETTER - always rerank in production
+const rerankedResults = await index.namespace("ns").searchRecords({
+  query: {
+    topK: 10,
+    inputs: { text: "query" },
+  },
+  rerank: {
+    model: "bge-reranker-v2-m3",
+    topN: 5,
+    rankFields: ["content"],
+  },
+});
+```
+
+### 5. **Hardcoded API Keys**
+
+```typescript
+// ❌ WRONG
+const pc = new Pinecone({ apiKey: "pc-abc123..." });
+
+// ✅ CORRECT
+const pc = new Pinecone({ apiKey: process.env.PINECONE_API_KEY });
+```
+
+### 6. **Missing Async/Await** (TypeScript-specific)
+
+```typescript
+// ❌ WRONG - forgetting await
+const results = index.namespace("ns").searchRecords({
+  query: { topK: 5, inputs: { text: "query" } },
+});
+console.log(results); // Will log a Promise, not results
+
+// ✅ CORRECT - use await
+const results = await index.namespace("ns").searchRecords({
+  query: { topK: 5, inputs: { text: "query" } },
+});
+console.log(results);
+```
+
+## ⏳ Indexing Delays & Eventual Consistency (Important!)
+
+> **For complete information on eventual consistency**, see [PINECONE-troubleshooting.md](./PINECONE-troubleshooting.md#indexing-delays--eventual-consistency).
+
+Pinecone uses **eventual consistency**. This means records don't immediately appear in searches or stats after upserting.
+
+### Realistic Timing Expectations
+
+| Operation          | Time          | Notes                                       |
+| ------------------ | ------------- | ------------------------------------------- |
+| Record stored      | 1-3 seconds   | Data is persisted                           |
+| Records searchable | 5-10 seconds  | Can find via `searchRecords()`              |
+| Stats updated      | 10-20 seconds | `describeIndexStats()` shows accurate count |
+| Indexes ready      | 30-60 seconds | New indexes enter "Ready" state             |
+
+### Correct Wait Pattern
+
+```typescript
+// Upload records
+await index.namespace("ns").upsertRecords(records);
+
+// WRONG - 5 seconds is too short!
+// await new Promise(r => setTimeout(r, 5000));
+
+// ✅ CORRECT - wait 10+ seconds
+await new Promise((r) => setTimeout(r, 10000));
+
+// Now search will work
+const results = await index.namespace("ns").searchRecords({ ... });
+```
+
+### Production Pattern: Polling for Readiness
+
+```typescript
+async function waitForRecords(
+  index: any,
+  namespace: string,
+  expectedCount: number,
+  maxWaitSeconds = 300
+): Promise<void> {
+  const startTime = Date.now();
+
+  while (Date.now() - startTime < maxWaitSeconds * 1000) {
+    const stats = await index.describeIndexStats();
+    const count = stats.namespaces?.[namespace]?.recordCount ?? 0;
+
+    if (count >= expectedCount) {
+      console.log(`✓ All ${count} records indexed`);
+      return;
+    }
+
+    console.log(`⏳ Indexed ${count}/${expectedCount} records, waiting...`);
+    await new Promise((r) => setTimeout(r, 5000)); // Check every 5 seconds
+  }
+
+  throw new Error(
+    `Timeout: Records not fully indexed after ${maxWaitSeconds}s`
+  );
+}
+
+// Usage
+await index.namespace("ns").upsertRecords(records);
+await waitForRecords(index, "ns", records.length);
+```
+
+## 🆘 Troubleshooting
+
+> **For general troubleshooting issues** (search returns no results, rate limits, metadata errors, etc.), see [PINECONE-troubleshooting.md](./PINECONE-troubleshooting.md).
+
+### Problem: TypeScript errors accessing `hit.fields`
+
+**Cause**: SDK returns generic object, TypeScript doesn't know your field names
+
+**Solution**: Use type casting
+
+```typescript
+// ❌ WRONG - TypeScript error: Property 'content' does not exist on type 'object'
+for (const hit of results.result.hits) {
+  console.log(hit.fields.content); // Compile error!
+}
+
+// ✅ CORRECT - Use type casting
+for (const hit of results.result.hits) {
+  const fields = hit.fields as Record<string, any>;
+  const content = String(fields?.content ?? "");
+  console.log(content);
+}
+```
+
+**Best practice**: Define an interface for your records:
+
+```typescript
+interface Document {
+  content: string;
+  category: string;
+}
+
+for (const hit of results.result.hits) {
+  const doc = hit.fields as unknown as Document;
+  console.log(doc.content, doc.category);
+}
+```
+
+### Problem: `Cannot find module '@pinecone-database/pinecone'`
+
+**Cause**: Wrong package name or not installed
+
+**Solution**:
+
+```bash
+# ✅ CORRECT
+npm install @pinecone-database/pinecone
+
+# ❌ WRONG - deprecated package
+npm install pinecone-client
+
+# If already installed, verify:
+npm list @pinecone-database/pinecone
+```
+
+### Problem: TypeScript compilation errors with Promise types
+
+**Cause**: Missing `await` keyword or incorrect async/await usage
+
+**Solution**:
+
+```typescript
+// ❌ WRONG - forgetting await
+const results = index.namespace("ns").searchRecords({
+  query: { topK: 5, inputs: { text: "query" } },
+});
+console.log(results); // Will log a Promise, not results
+
+// ✅ CORRECT - use await
+const results = await index.namespace("ns").searchRecords({
+  query: { topK: 5, inputs: { text: "query" } },
+});
+console.log(results);
+
+// ✅ CORRECT - async function
+async function searchData() {
+  const results = await index.namespace("ns").searchRecords({
+    query: { topK: 5, inputs: { text: "query" } },
+  });
+  return results;
+}
+```
+
+### Problem: TypeScript errors with index namespace operations
+
+**Cause**: Type inference issues or incorrect index reference
+
+**Solution**:
+
+```typescript
+// ✅ CORRECT - properly typed index
+const index = pc.index("my-index"); // Type is inferred
+await index.namespace("ns").upsertRecords(records);
+
+// ✅ CORRECT - explicit typing if needed
+import { Index } from "@pinecone-database/pinecone";
+const index: Index = pc.index("my-index");
+```
+
+For other troubleshooting issues, see [PINECONE-troubleshooting.md](./PINECONE-troubleshooting.md).
 
 ## Node.js Ecosystem Integration
 
@@ -791,10 +1137,11 @@ app.get("/search", async (req, res) => {
     const { query, namespace } = req.query;
     const index = pc.index("my-index");
 
-    const results = await index.namespace(namespace as string).query({
-      vector: query as string,
-      topK: 10,
-      includeMetadata: true,
+    const results = await index.namespace(namespace as string).searchRecords({
+      query: {
+        topK: 10,
+        inputs: { text: query as string },
+      },
     });
 
     res.json(results);
@@ -817,10 +1164,11 @@ export default async function handler(req: any, res: any) {
     const { query, namespace } = req.body;
     const index = pc.index("my-index");
 
-    const results = await index.namespace(namespace).query({
-      vector: query,
-      topK: 10,
-      includeMetadata: true,
+    const results = await index.namespace(namespace).searchRecords({
+      query: {
+        topK: 10,
+        inputs: { text: query },
+      },
     });
 
     res.status(200).json(results);
