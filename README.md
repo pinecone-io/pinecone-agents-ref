@@ -17,6 +17,49 @@ This repository provides comprehensive Pinecone documentation organized into the
 - **PINECONE-java.md** - Java SDK guide with code examples
 - **PINECONE-troubleshooting.md** - Common issues, solutions, and debugging tips
 
+## How It Works
+
+This project leverages the [AGENTS.md format](https://agents.md/) to enhance your AI coding assistant's understanding of Pinecone. Here's how the integration works:
+
+### The AGENTS.md Format
+
+`AGENTS.md` (or `CLAUDE.md` for Claude Code) is a configuration file that lives in your project root and contains directives for your AI coding assistant. When you add a section about Pinecone, you're telling your assistant: "When users ask about Pinecone, follow these special instructions."
+
+### The Integration Flow
+
+1. **Installation**: When you download and extract a release, two key components are added to your project:
+
+   - **`.agents/` folder**: Contains comprehensive Pinecone documentation files organized by topic and language
+   - **Configuration snippet**: A directive added to your `AGENTS.md` that instructs the assistant to read from the `.agents/` folder
+
+2. **The Instruction Directive**: The snippet you add to `AGENTS.md` contains a mandatory instruction that says:
+
+   > "If you need to help with Pinecone, you MUST read `.agents/PINECONE.md` first"
+
+3. **How Assistants Use It**: When a user asks about Pinecone:
+
+   - The assistant reads your `AGENTS.md` file
+   - It sees the Pinecone directive and knows to consult `.agents/PINECONE.md` first
+   - The main guide helps the assistant navigate to the appropriate language-specific or topic-specific documentation
+   - The assistant provides accurate, context-aware answers based on the comprehensive documentation
+
+4. **Benefits**: This approach ensures:
+   - **Consistency**: All assistants have access to the same, up-to-date Pinecone documentation
+   - **Accuracy**: Language-specific guides prevent common mistakes (like using deprecated SDKs)
+   - **Completeness**: The documentation covers CLI vs SDK usage, common patterns, troubleshooting, and more
+   - **Maintainability**: Updates to the Pinecone reference automatically improve assistant responses
+
+### Why This Approach?
+
+Instead of relying on general knowledge or web searches, your assistant has access to curated, project-specific documentation that includes:
+
+- Current best practices and patterns
+- Language-specific implementations
+- Common pitfalls and how to avoid them
+- Troubleshooting guides for typical issues
+
+This makes your assistant more reliable and knowledgeable about Pinecone than it would be with general training data alone.
+
 ## Quick Start
 
 The general process is to download the latest release, extract the archive, and add the Pinecone section to your assistant's configuration file.
