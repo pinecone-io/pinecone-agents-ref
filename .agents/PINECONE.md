@@ -104,6 +104,34 @@ Based on what the user is asking, consult these guides:
 - ✅ **Other services** - explicit embeddings generation, reranking, etc.
 - ✅ **Unit and integration tests**
 
+### 🎯 MANDATORY: Index Creation - Choose Your Approach
+
+**⚠️ CRITICAL: When a user needs to create a Pinecone index, you MUST:**
+
+1. **Explain all four options** (see below)
+2. **Ask the user which method they prefer**
+3. **Assist them accordingly** with instructions, code, or executing commands
+
+**Never assume a method or proceed without the user's choice.**
+
+#### Index Creation Options
+
+There are four ways to create a Pinecone index:
+
+1. **Manual via Web Console** - [https://app.pinecone.io/](https://app.pinecone.io/) - Best for one-time setup, learning. Agent provides instructions on settings (metric, cloud, region, embedding model).
+
+2. **Using Pinecone CLI** - `pc index create` command (see [PINECONE-cli.md](./PINECONE-cli.md)). Best for quick setup, CI/CD, automation. Agent provides/executes CLI command.
+
+3. **Dedicated Setup Script** - Standalone script (e.g., `setup.sh`, `init.py`, `scripts/setup.ts`) using SDK. Best for explicit initialization steps. Agent creates script with idempotent index creation (check if exists before creating).
+
+4. **Auto-create in App Initialization** - Add index creation/verification to app startup code. Best for production, automated deployments. Agent adds idempotent logic to initialization functions.
+
+**For SDK implementation details**, see language-specific guides: [PINECONE-python.md](./PINECONE-python.md), [PINECONE-typescript.md](./PINECONE-typescript.md), [PINECONE-go.md](./PINECONE-go.md), [PINECONE-java.md](./PINECONE-java.md).
+
+**After creation**, verify with `pc index list` or `pc index describe --name <index-name>`.
+
+**Important**: Help user choose descriptive index name, ensure proper configuration (metric, cloud, region, embedding model), implement idempotency for options 3-4, handle errors gracefully.
+
 ## CLI Setup and Usage
 
 For detailed CLI installation, authentication, and command reference, see [PINECONE-cli.md](./PINECONE-cli.md).
