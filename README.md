@@ -15,6 +15,7 @@ This repository provides comprehensive Pinecone documentation organized into the
 - **PINECONE-typescript.md** - TypeScript/Node.js SDK guide with code examples
 - **PINECONE-go.md** - Go SDK guide with code examples
 - **PINECONE-java.md** - Java SDK guide with code examples
+- **PINECONE-troubleshooting.md** - Common issues, solutions, and debugging tips
 
 ## Quick Start
 
@@ -81,15 +82,16 @@ After running the commands above, you should have:
 
 ```
 your-project/
-├── .agents/                    # Agent documentation folder
-│   ├── PINECONE.md             # Main universal guide
-│   ├── PINECONE-quickstart.md  # Quickstart tutorials
-│   ├── PINECONE-cli.md         # CLI documentation
-│   ├── PINECONE-python.md      # Python SDK guide
-│   ├── PINECONE-typescript.md  # TypeScript/Node.js SDK guide
-│   ├── PINECONE-go.md          # Go SDK guide
-│   └── PINECONE-java.md        # Java SDK guide
-└── AGENTS.md                   # Your project's agent guide (with Pinecone section)
+├── .agents/                         # Agent documentation folder
+│   ├── PINECONE.md                  # Main universal guide
+│   ├── PINECONE-quickstart.md       # Quickstart tutorials
+│   ├── PINECONE-cli.md              # CLI documentation
+│   ├── PINECONE-python.md           # Python SDK guide
+│   ├── PINECONE-typescript.md       # TypeScript/Node.js SDK guide
+│   ├── PINECONE-go.md               # Go SDK guide
+│   ├── PINECONE-java.md             # Java SDK guide
+│   └── PINECONE-troubleshooting.md  # Troubleshooting guide
+└── AGENTS.md                        # Your project's agent guide (with Pinecone section)
 
 ```
 
@@ -157,7 +159,7 @@ The workflow triggers automatically on tag push (`push: tags: v*`) and:
    - If a release exists → uses that release and attaches assets
    - If no release exists → creates a new release automatically
 3. Packages the following files:
-   - All files from `.agents/` folder (7 Pinecone documentation files)
+   - All files from `.agents/` folder (8 Pinecone documentation files)
    - `AGENTS-pinecone-snippet.md` file
 4. Creates archives with the structure:
    ```
@@ -169,7 +171,8 @@ The workflow triggers automatically on tag push (`push: tags: v*`) and:
    │   ├── PINECONE-python.md
    │   ├── PINECONE-typescript.md
    │   ├── PINECONE-go.md
-   │   └── PINECONE-java.md
+   │   ├── PINECONE-java.md
+   │   └── PINECONE-troubleshooting.md
    └── AGENTS-pinecone-snippet.md
    ```
 5. Uploads both `agents.zip` and `agents.tar.gz` to the release
