@@ -35,15 +35,25 @@ Based on what the user is asking, consult these guides:
 - **Troubleshooting** → [PINECONE-troubleshooting.md](./PINECONE-troubleshooting.md)
 - **Language-specific info** → See language-specific files above
 
-## Language Detection
+## Language Selection
 
-Determine the primary programming language by checking for these files:
+**Determine the programming language** by checking for these files in the project:
 
 - **`package.json`** → TypeScript/Node.js (see [PINECONE-typescript.md](./PINECONE-typescript.md))
 - **`requirements.txt` or `pyproject.toml`** → Python (see [PINECONE-python.md](./PINECONE-python.md))
 - **`pom.xml` or `build.gradle`** → Java (see [PINECONE-java.md](./PINECONE-java.md))
 - **`go.mod`** → Go (see [PINECONE-go.md](./PINECONE-go.md))
-- **Default fallback** → Python (see [PINECONE-python.md](./PINECONE-python.md))
+
+**If a language can be reliably detected from project files, proceed with that language.**
+
+**If no clear language indicators exist**, ask the user: "What programming language would you like to use? (Python, TypeScript/Node.js, Go, Java, or other?)"
+
+**Supported languages:**
+
+- **TypeScript/Node.js** → See [PINECONE-typescript.md](./PINECONE-typescript.md)
+- **Python** → See [PINECONE-python.md](./PINECONE-python.md)
+- **Java** → See [PINECONE-java.md](./PINECONE-java.md)
+- **Go** → See [PINECONE-go.md](./PINECONE-go.md)
 
 ## Universal Concepts (All Languages)
 
