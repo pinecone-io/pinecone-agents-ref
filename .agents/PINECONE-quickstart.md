@@ -8,22 +8,19 @@ This guide provides step-by-step instructions for building your first Pinecone a
 
 ## Choosing Your Quickstart
 
-When you are asked to help get started with Pinecone:
+⚠️ **MANDATORY: When you are asked to help get started with Pinecone:**
 
-1. **Detect or ask for programming language**:
+1. **Always ask: What do you want to build?**
 
-   - Check project files for: `package.json` (JavaScript/TypeScript), `requirements.txt` or `pyproject.toml` (Python), `pom.xml` or `build.gradle` (Java), `go.mod` (Go)
-   - If no language can be determined, ask the user which language they prefer
-
-2. **Ask the user to choose a quickstart option**:
-
-   - **Quick Test**: Create an index, upsert data, and perform semantic search.
-   - **Use Case**:
+   - Ask the user to choose one of these options:
+     - **Quick Test**: Create an index, upsert data, and perform semantic search. (Best for first-time users)
      - **Search**: Build a semantic search system that returns ranked results from your knowledge base. This pattern is ideal for search interfaces where users need a list of relevant documents with confidence scores.
      - **RAG**: Build a multi-tenant RAG (Retrieval-Augmented Generation) system that retrieves relevant context per tenant and feeds it to an LLM to generate answers. Each tenant (organization, workspace, or user) has isolated data stored in separate Pinecone namespaces. This pattern is ideal for knowledge bases, customer support platforms, and collaborative workspaces.
      - **Recommendations**: Build a recommendation engine that suggests similar items based on semantic similarity. This pattern is ideal for e-commerce, content platforms, and user personalization systems.
 
-3. **Based on the choices, use the appropriate language-specific pattern below.**
+2. **Determine programming language:** Follow the language selection instructions in [PINECONE.md](./PINECONE.md#language-selection).
+
+3. **Proceed with the appropriate language-specific pattern** based on the detected/confirmed language and the selected use case.
 
 ## Language-Specific Quickstarts
 
