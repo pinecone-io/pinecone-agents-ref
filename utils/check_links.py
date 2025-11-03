@@ -66,78 +66,159 @@ def extract_links_from_markdown(content: str) -> List[Tuple[str, int]]:
     return links
 
 
+def is_downloadable_file(url: str, content_type: str = None) -> bool:
+    """
+    Check if URL points to a downloadable file (not HTML).
+    Checks both URL extension and Content-Type header.
+    """
+    # Check Content-Type header first if available
+    if content_type:
+        content_type_lower = content_type.lower()
+        # If it's clearly HTML, it's not a downloadable file
+        if 'text/html' in content_type_lower:
+            return False
+        # If it's a known file type, it's downloadable
+        file_type_indicators = [
+            'application/pdf',
+            'application/zip',
+            'application/x-zip',
+            'application/gzip',
+            'application/x-gzip',
+            'application/octet-stream',
+            'image/',
+            'video/',
+            'audio/',
+            'application/json',  # JSON files
+            'text/plain',  # Plain text files (but not HTML)
+        ]
+        if any(indicator in content_type_lower for indicator in file_type_indicators):
+            return True
+    
+    # Check URL extension as fallback
+    url_lower = url.lower()
+    file_extensions = [
+        '.pdf', '.zip', '.gz', '.tar', '.rar', '.7z',
+        '.jpg', '.jpeg', '.png', '.gif', '.svg', '.webp', '.ico',
+        '.mp4', '.mp3', '.avi', '.mov', '.wmv',
+        '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx',
+        '.csv', '.tsv', '.json', '.xml',
+        '.exe', '.dmg', '.deb', '.rpm',
+    ]
+    return any(url_lower.endswith(ext) for ext in file_extensions)
+
+
 def check_url(url: str, timeout: int = 10, allow_redirects: bool = True) -> Tuple[bool, int, str]:
     """
     Check if URL is accessible.
     Returns: (is_valid, status_code, error_message)
-    Uses GET request to check content for false positives (pages that return 200 but show 404).
+    Uses HEAD request first to avoid downloading files, falls back to GET for HTML pages
+    that may need content verification for false 404 detection.
     """
     try:
         headers = {'User-Agent': 'Mozilla/5.0 (compatible; LinkChecker/1.0)'}
+        MAX_BODY_SIZE = 8192  # Only read first 8KB for HTML content verification
         
         if USE_REQUESTS:
-            # Use GET instead of HEAD to check page content for false positives
-            response = requests.get(
-                url,
-                timeout=timeout,
-                allow_redirects=allow_redirects,
-                headers=headers
-            )
-            status_code = response.status_code
-            
-            # Check if page is actually valid (not a 404 page with 200 status)
-            is_valid = status_code < 400
-            if is_valid and status_code == 200:
-                # Check for common 404 indicators in HTML content
-                content_lower = response.text.lower()
-                
-                # Extract title tag content more reliably
-                title_match = None
-                title_pattern = r'<title[^>]*>(.*?)</title>'
-                title_matches = re.findall(title_pattern, content_lower, re.DOTALL | re.IGNORECASE)
-                if title_matches:
-                    title_text = title_matches[0].strip()
-                    # Check for various 404 indicators in title
-                    if any(phrase in title_text for phrase in [
-                        'page not found',
-                        'not found',
-                        '404',
-                        'page does not exist',
-                        'couldn\'t find the page',
-                        'we couldn\'t find'
-                    ]):
-                        is_valid = False
-                        error_message = f"200 (but page shows '{title_matches[0].strip()}' in title)"
-                    else:
-                        error_message = ""
-                else:
-                    # No title tag found, check body content for 404 indicators
-                    if 'page not found' in content_lower[:5000] or '404' in content_lower[:5000]:
-                        is_valid = False
-                        error_message = "200 (but page content suggests 404)"
-                    else:
-                        error_message = ""
-            else:
-                error_message = f"{status_code} {response.reason}" if not is_valid else ""
-        else:
-            # Fallback to urllib - use GET to check content
-            request = urllib.request.Request(url, headers=headers)
+            # Try HEAD request first (doesn't download body)
             try:
-                with urllib.request.urlopen(request, timeout=timeout) as response:
-                    status_code = response.status
+                head_response = requests.head(
+                    url,
+                    timeout=timeout,
+                    allow_redirects=allow_redirects,
+                    headers=headers
+                )
+                status_code = head_response.status_code
+                content_type = head_response.headers.get('Content-Type', '')
+                
+                # Check if page is valid
+                is_valid = status_code < 400
+                
+                # If it's a downloadable file, just use HEAD result (no need to download)
+                if is_downloadable_file(url, content_type):
+                    error_message = f"{status_code} {head_response.reason}" if not is_valid else ""
+                    return (is_valid, status_code, error_message)
+                
+                # For HTML pages with 200 status, verify it's not a false 404
+                # by downloading a small portion
+                if is_valid and status_code == 200:
+                    # Use GET with stream=True to limit download size
+                    get_response = requests.get(
+                        url,
+                        timeout=timeout,
+                        allow_redirects=allow_redirects,
+                        headers=headers,
+                        stream=True
+                    )
+                    # Read only first MAX_BODY_SIZE bytes
+                    content_chunk = b''
+                    for chunk in get_response.iter_content(chunk_size=1024):
+                        content_chunk += chunk
+                        if len(content_chunk) >= MAX_BODY_SIZE:
+                            break
+                    
+                    content_lower = content_chunk.decode('utf-8', errors='ignore').lower()
+                    
+                    # Extract title tag content
+                    title_pattern = r'<title[^>]*>(.*?)</title>'
+                    title_matches = re.findall(title_pattern, content_lower, re.DOTALL | re.IGNORECASE)
+                    if title_matches:
+                        title_text = title_matches[0].strip()
+                        # Check for various 404 indicators in title
+                        if any(phrase in title_text for phrase in [
+                            'page not found',
+                            'not found',
+                            '404',
+                            'page does not exist',
+                            'couldn\'t find the page',
+                            'we couldn\'t find'
+                        ]):
+                            is_valid = False
+                            error_message = f"200 (but page shows '{title_matches[0].strip()}' in title)"
+                        else:
+                            error_message = ""
+                    else:
+                        # No title tag found, check body content for 404 indicators
+                        if 'page not found' in content_lower[:MAX_BODY_SIZE] or '404' in content_lower[:MAX_BODY_SIZE]:
+                            is_valid = False
+                            error_message = "200 (but page content suggests 404)"
+                        else:
+                            error_message = ""
+                else:
+                    error_message = f"{status_code} {head_response.reason}" if not is_valid else ""
+                    
+            except requests.exceptions.RequestException as e:
+                # If HEAD fails (e.g., 405 Method Not Allowed), try GET with limited size
+                try:
+                    get_response = requests.get(
+                        url,
+                        timeout=timeout,
+                        allow_redirects=allow_redirects,
+                        headers=headers,
+                        stream=True
+                    )
+                    status_code = get_response.status_code
+                    content_type = get_response.headers.get('Content-Type', '')
+                    
                     is_valid = status_code < 400
                     
-                    # For 200 status, read content to check for false positives
+                    # If it's a downloadable file, don't read body
+                    if is_downloadable_file(url, content_type):
+                        error_message = f"{status_code} {get_response.reason}" if not is_valid else ""
+                        return (is_valid, status_code, error_message)
+                    
+                    # For HTML with 200, check content (already streaming, limit read)
                     if is_valid and status_code == 200:
-                        content = response.read().decode('utf-8', errors='ignore').lower()
+                        content_chunk = b''
+                        for chunk in get_response.iter_content(chunk_size=1024):
+                            content_chunk += chunk
+                            if len(content_chunk) >= MAX_BODY_SIZE:
+                                break
                         
-                        # Extract title tag content more reliably
-                        title_match = None
+                        content_lower = content_chunk.decode('utf-8', errors='ignore').lower()
                         title_pattern = r'<title[^>]*>(.*?)</title>'
-                        title_matches = re.findall(title_pattern, content, re.DOTALL | re.IGNORECASE)
+                        title_matches = re.findall(title_pattern, content_lower, re.DOTALL | re.IGNORECASE)
                         if title_matches:
                             title_text = title_matches[0].strip()
-                            # Check for various 404 indicators in title
                             if any(phrase in title_text for phrase in [
                                 'page not found',
                                 'not found',
@@ -151,18 +232,110 @@ def check_url(url: str, timeout: int = 10, allow_redirects: bool = True) -> Tupl
                             else:
                                 error_message = ""
                         else:
-                            # No title tag found, check body content for 404 indicators
-                            if 'page not found' in content[:5000] or '404' in content[:5000]:
+                            if 'page not found' in content_lower[:MAX_BODY_SIZE] or '404' in content_lower[:MAX_BODY_SIZE]:
                                 is_valid = False
                                 error_message = "200 (but page content suggests 404)"
                             else:
                                 error_message = ""
                     else:
-                        error_message = f"{status_code}" if not is_valid else ""
-            except urllib.error.HTTPError as e:
-                status_code = e.code
-                is_valid = status_code < 400
-                error_message = f"{status_code} {e.reason}"
+                        error_message = f"{status_code} {get_response.reason}" if not is_valid else ""
+                except Exception as inner_e:
+                    return (False, 0, str(inner_e))
+        else:
+            # Fallback to urllib
+            # Try HEAD first
+            try:
+                head_request = urllib.request.Request(url, headers=headers, method='HEAD')
+                try:
+                    with urllib.request.urlopen(head_request, timeout=timeout) as response:
+                        status_code = response.status
+                        content_type = response.headers.get('Content-Type', '')
+                        is_valid = status_code < 400
+                        
+                        # If downloadable file, just use HEAD result
+                        if is_downloadable_file(url, content_type):
+                            error_message = f"{status_code}" if not is_valid else ""
+                            return (is_valid, status_code, error_message)
+                        
+                        # For HTML with 200, need to verify with GET (limited)
+                        if is_valid and status_code == 200:
+                            # Use GET but read limited amount
+                            get_request = urllib.request.Request(url, headers=headers)
+                            with urllib.request.urlopen(get_request, timeout=timeout) as get_response:
+                                content = get_response.read(MAX_BODY_SIZE).decode('utf-8', errors='ignore').lower()
+                                title_pattern = r'<title[^>]*>(.*?)</title>'
+                                title_matches = re.findall(title_pattern, content, re.DOTALL | re.IGNORECASE)
+                                if title_matches:
+                                    title_text = title_matches[0].strip()
+                                    if any(phrase in title_text for phrase in [
+                                        'page not found',
+                                        'not found',
+                                        '404',
+                                        'page does not exist',
+                                        'couldn\'t find the page',
+                                        'we couldn\'t find'
+                                    ]):
+                                        is_valid = False
+                                        error_message = f"200 (but page shows '{title_matches[0].strip()}' in title)"
+                                    else:
+                                        error_message = ""
+                                else:
+                                    if 'page not found' in content[:MAX_BODY_SIZE] or '404' in content[:MAX_BODY_SIZE]:
+                                        is_valid = False
+                                        error_message = "200 (but page content suggests 404)"
+                                    else:
+                                        error_message = ""
+                        else:
+                            error_message = f"{status_code}" if not is_valid else ""
+                except urllib.error.HTTPError as e:
+                    status_code = e.code
+                    is_valid = status_code < 400
+                    error_message = f"{status_code} {e.reason}"
+            except (urllib.error.URLError, ValueError) as e:
+                # HEAD not supported or failed, try GET with limited read
+                try:
+                    get_request = urllib.request.Request(url, headers=headers)
+                    with urllib.request.urlopen(get_request, timeout=timeout) as response:
+                        status_code = response.status
+                        content_type = response.headers.get('Content-Type', '')
+                        is_valid = status_code < 400
+                        
+                        # If downloadable file, don't read more than headers
+                        if is_downloadable_file(url, content_type):
+                            error_message = f"{status_code}" if not is_valid else ""
+                            return (is_valid, status_code, error_message)
+                        
+                        # For HTML with 200, read limited content
+                        if is_valid and status_code == 200:
+                            content = response.read(MAX_BODY_SIZE).decode('utf-8', errors='ignore').lower()
+                            title_pattern = r'<title[^>]*>(.*?)</title>'
+                            title_matches = re.findall(title_pattern, content, re.DOTALL | re.IGNORECASE)
+                            if title_matches:
+                                title_text = title_matches[0].strip()
+                                if any(phrase in title_text for phrase in [
+                                    'page not found',
+                                    'not found',
+                                    '404',
+                                    'page does not exist',
+                                    'couldn\'t find the page',
+                                    'we couldn\'t find'
+                                ]):
+                                    is_valid = False
+                                    error_message = f"200 (but page shows '{title_matches[0].strip()}' in title)"
+                                else:
+                                    error_message = ""
+                            else:
+                                if 'page not found' in content[:MAX_BODY_SIZE] or '404' in content[:MAX_BODY_SIZE]:
+                                    is_valid = False
+                                    error_message = "200 (but page content suggests 404)"
+                                else:
+                                    error_message = ""
+                        else:
+                            error_message = f"{status_code}" if not is_valid else ""
+                except urllib.error.HTTPError as e:
+                    status_code = e.code
+                    is_valid = status_code < 400
+                    error_message = f"{status_code} {e.reason}"
             
         return (is_valid, status_code, error_message)
     except Exception as e:

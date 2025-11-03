@@ -234,7 +234,7 @@ jobs:
 
       - name: Install Pinecone CLI
         run: |
-          curl -L https://github.com/pinecone-io/cli/releases/latest/download/pinecone_linux_amd64.tar.gz | tar xz
+          curl -L https://github.com/pinecone-io/cli/releases/latest/download/pc_Linux_x86_64.tar.gz | tar xz
           sudo mv pinecone /usr/local/bin/
 
       - name: Create Production Index
@@ -253,7 +253,7 @@ jobs:
 # Install Pinecone CLI in Docker image
 FROM alpine:latest
 RUN apk add --no-cache curl
-RUN curl -L https://github.com/pinecone-io/cli/releases/latest/download/pinecone_linux_amd64.tar.gz | tar xz -C /usr/local/bin/
+RUN curl -L https://github.com/pinecone-io/cli/releases/latest/download/pc_Linux_x86_64.tar.gz | tar xz -C /usr/local/bin/
 COPY deploy-index.sh /scripts/
 RUN chmod +x /scripts/deploy-index.sh
 ```
@@ -289,4 +289,3 @@ pc index delete --name old-index
 - **Official CLI Documentation**: [https://docs.pinecone.io/reference/cli/command-reference](https://docs.pinecone.io/reference/cli/command-reference)
 - **CLI GitHub Repository**: [https://github.com/pinecone-io/cli](https://github.com/pinecone-io/cli)
 - **CLI Releases**: [https://github.com/pinecone-io/cli/releases](https://github.com/pinecone-io/cli/releases)
-- **CLI Examples**: [https://docs.pinecone.io/guides/cli](https://docs.pinecone.io/guides/cli)
