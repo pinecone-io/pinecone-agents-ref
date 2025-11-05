@@ -756,7 +756,21 @@ class PineconeClient {
 
 ### Semantic Search System
 
+**Create index with CLI:**
+
+```bash
+pc index create -n agentic-quickstart-search -m cosine -c aws -r us-east-1 --model llama-text-embed-v2 --field_map text=content
+```
+
+**Implementation:**
+
 ```typescript
+import { Pinecone } from "@pinecone-database/pinecone";
+
+// Initialize Pinecone client
+const pc = new Pinecone({ apiKey: process.env.PINECONE_API_KEY });
+const index = pc.index("agentic-quickstart-search");
+
 function buildSemanticSearchSystem() {
   // Build a semantic search system with reranking and filtering
   return async function searchKnowledgeBase(
@@ -789,7 +803,21 @@ function buildSemanticSearchSystem() {
 
 ### Multi-Tenant RAG System
 
+**Create index with CLI:**
+
+```bash
+pc index create -n agentic-quickstart-rag -m cosine -c aws -r us-east-1 --model llama-text-embed-v2 --field_map text=content
+```
+
+**Implementation:**
+
 ```typescript
+import { Pinecone } from "@pinecone-database/pinecone";
+
+// Initialize Pinecone client
+const pc = new Pinecone({ apiKey: process.env.PINECONE_API_KEY });
+const index = pc.index("agentic-quickstart-rag");
+
 function buildRagSystem() {
   // Build a multi-tenant RAG system with namespace isolation
   return async function ragQuery(
@@ -828,7 +856,21 @@ function buildRagSystem() {
 
 ### Recommendation Engine
 
+**Create index with CLI:**
+
+```bash
+pc index create -n agentic-quickstart-recommendations -m cosine -c aws -r us-east-1 --model llama-text-embed-v2 --field_map text=content
+```
+
+**Implementation:**
+
 ```typescript
+import { Pinecone } from "@pinecone-database/pinecone";
+
+// Initialize Pinecone client
+const pc = new Pinecone({ apiKey: process.env.PINECONE_API_KEY });
+const index = pc.index("agentic-quickstart-recommendations");
+
 function buildRecommendationEngine() {
   // Build a recommendation engine with filtering and diversity
   return async function getRecommendations(

@@ -614,7 +614,22 @@ class PineconeClient:
 
 ### Semantic Search System
 
+**Create index with CLI:**
+
+```bash
+pc index create -n agentic-quickstart-search -m cosine -c aws -r us-east-1 --model llama-text-embed-v2 --field_map text=content
+```
+
+**Implementation:**
+
 ```python
+from pinecone import Pinecone
+import os
+
+# Initialize Pinecone client
+pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
+index = pc.Index("agentic-quickstart-search")
+
 def build_semantic_search_system():
     """Build a semantic search system with reranking and filtering"""
 
@@ -645,7 +660,22 @@ def build_semantic_search_system():
 
 ### Multi-Tenant RAG System
 
+**Create index with CLI:**
+
+```bash
+pc index create -n agentic-quickstart-rag -m cosine -c aws -r us-east-1 --model llama-text-embed-v2 --field_map text=content
+```
+
+**Implementation:**
+
 ```python
+from pinecone import Pinecone
+import os
+
+# Initialize Pinecone client
+pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
+index = pc.Index("agentic-quickstart-rag")
+
 def build_rag_system():
     """Build a multi-tenant RAG system with namespace isolation"""
 
@@ -680,7 +710,22 @@ def build_rag_system():
 
 ### Recommendation Engine
 
+**Create index with CLI:**
+
+```bash
+pc index create -n agentic-quickstart-recommendations -m cosine -c aws -r us-east-1 --model llama-text-embed-v2 --field_map text=content
+```
+
+**Implementation:**
+
 ```python
+from pinecone import Pinecone
+import os
+
+# Initialize Pinecone client
+pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
+index = pc.Index("agentic-quickstart-recommendations")
+
 def build_recommendation_engine():
     """Build a recommendation engine with filtering and diversity"""
 

@@ -242,7 +242,12 @@ export GROQ_API_KEY="your-groq-key-here"
 
 ### Steps
 
-1. **Create an index** with integrated embeddings
+1. **Create an index** with integrated embeddings using CLI:
+
+```bash
+pc index create -n agentic-quickstart-search -m cosine -c aws -r us-east-1 --model llama-text-embed-v2 --field_map text=content
+```
+
 2. **Create documents** with rich metadata (20+ documents recommended)
 3. **Store documents** in Pinecone using proper namespaces
 4. **Build search function** with:
@@ -277,7 +282,12 @@ See the "Use Case Examples" section in your language guide:
 
 ### Steps
 
-1. **Create an index** with integrated embeddings
+1. **Create an index** with integrated embeddings using CLI:
+
+```bash
+pc index create -n agentic-quickstart-rag -m cosine -c aws -r us-east-1 --model llama-text-embed-v2 --field_map text=content
+```
+
 2. **Create tenant data** (emails, documents, etc.) with metadata
 3. **Store data per tenant** using separate namespaces
 4. **Build RAG function** that:
@@ -313,7 +323,12 @@ See the "Use Case Examples" section in your language guide:
 
 ### Steps
 
-1. **Create an index** with integrated embeddings
+1. **Create an index** with integrated embeddings using CLI:
+
+```bash
+pc index create -n agentic-quickstart-recommendations -m cosine -c aws -r us-east-1 --model llama-text-embed-v2 --field_map text=content
+```
+
 2. **Create product listings** with rich metadata (20+ products)
 3. **Store products** in Pinecone
 4. **Build recommendation function** that:
