@@ -8,6 +8,75 @@ This guide provides Python-specific patterns, examples, and best practices for t
 
 > **⚠️ IMPORTANT**: See [PINECONE.md](./PINECONE.md#-mandatory-always-use-latest-version) for the mandatory requirement to always use the latest version when creating projects.
 
+### Virtual Environment Setup
+
+> **⚠️ MANDATORY**: Before installing any dependencies, you MUST check if a virtual environment is already configured for the project. If no virtual environment is detected, you MUST create one.
+
+**Virtual Environment Requirements:**
+
+1. **Check for existing virtual environment:**
+
+   - Look for activation scripts: `venv/bin/activate`, `.venv/bin/activate`, `env/bin/activate`, `virtualenv/bin/activate`
+   - Check for `conda` environment files: `environment.yml`, `.conda/`
+   - Check for `pipenv` indicators: `Pipfile`, `.venv/`
+   - Check for `poetry` indicators: `poetry.lock`, `pyproject.toml` with `[tool.poetry]` section
+
+2. **If no virtual environment is found:**
+
+   - **Ask the user** which Python virtual environment framework they prefer:
+     - `venv` (default, recommended) - Built into Python 3.3+
+     - `virtualenv` - Third-party alternative
+     - `conda` - For data science projects
+     - `pipenv` - For Pipfile-based projects
+     - `poetry` - For modern dependency management
+   - **Default to `venv`** if the user doesn't specify a preference
+   - **Create the virtual environment** using the chosen framework
+   - **Provide activation instructions** for the user's shell
+
+3. **Virtual environment creation examples:**
+
+   **venv (default):**
+
+   ```bash
+   python3 -m venv venv
+   # Activate: source venv/bin/activate (Unix/Mac) or venv\Scripts\activate (Windows)
+   ```
+
+   **virtualenv:**
+
+   ```bash
+   virtualenv venv
+   # Activate: source venv/bin/activate (Unix/Mac) or venv\Scripts\activate (Windows)
+   ```
+
+   **conda:**
+
+   ```bash
+   conda create -n project-name python=3.11
+   conda activate project-name
+   ```
+
+   **pipenv:**
+
+   ```bash
+   pipenv install
+   pipenv shell
+   ```
+
+   **poetry:**
+
+   ```bash
+   poetry install
+   poetry shell
+   ```
+
+4. **After creating/activating the virtual environment:**
+   - Install dependencies within the activated virtual environment
+   - Ensure all `pip install` commands run in the virtual environment context
+   - Update `.gitignore` to exclude the virtual environment directory (e.g., `venv/`, `.venv/`, `env/`)
+
+**Never install Python packages globally unless explicitly requested by the user.**
+
 ### Current API (2025)
 
 ```python
