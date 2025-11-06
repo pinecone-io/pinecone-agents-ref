@@ -171,6 +171,8 @@ pc index create -n agentic-quickstart-test -m cosine -c aws -r us-east-1 --model
 
 2. **Upsert sample data:**
 
+> **Sample Data**: Use the sample data from [PINECONE-quickstart.md](./PINECONE-quickstart.md#sample-data-use-in-all-languages). Convert JSON format to TypeScript objects.
+
 ```typescript
 import { Pinecone } from "@pinecone-database/pinecone";
 
@@ -182,11 +184,11 @@ if (!apiKey) {
 
 const pc = new Pinecone({ apiKey });
 
+// Sample data (see quickstart guide for full list)
 const records = [
   {
     _id: "rec1",
-    content:
-      "The Eiffel Tower was completed in 1889 and stands in Paris, France.",
+    content: "The Eiffel Tower was completed in 1889 and stands in Paris, France.",
     category: "history",
   },
   {
@@ -194,60 +196,7 @@ const records = [
     content: "Photosynthesis allows plants to convert sunlight into energy.",
     category: "science",
   },
-  {
-    _id: "rec5",
-    content:
-      "Shakespeare wrote many famous plays, including Hamlet and Macbeth.",
-    category: "literature",
-  },
-  {
-    _id: "rec7",
-    content: "The Great Wall of China was built to protect against invasions.",
-    category: "history",
-  },
-  {
-    _id: "rec15",
-    content: "Leonardo da Vinci painted the Mona Lisa.",
-    category: "art",
-  },
-  {
-    _id: "rec17",
-    content:
-      "The Pyramids of Giza are among the Seven Wonders of the Ancient World.",
-    category: "history",
-  },
-  {
-    _id: "rec21",
-    content:
-      "The Statue of Liberty was a gift from France to the United States.",
-    category: "history",
-  },
-  {
-    _id: "rec26",
-    content: "Rome was once the center of a vast empire.",
-    category: "history",
-  },
-  {
-    _id: "rec33",
-    content: "The violin is a string instrument commonly used in orchestras.",
-    category: "music",
-  },
-  {
-    _id: "rec38",
-    content: "The Taj Mahal is a mausoleum built by Emperor Shah Jahan.",
-    category: "history",
-  },
-  {
-    _id: "rec48",
-    content: "Vincent van Gogh painted Starry Night.",
-    category: "art",
-  },
-  {
-    _id: "rec50",
-    content:
-      "Renewable energy sources include wind, solar, and hydroelectric power.",
-    category: "energy",
-  },
+  // ... (use all 12 records from quickstart guide)
 ];
 
 // Target the index
@@ -267,7 +216,7 @@ await new Promise((resolve) => setTimeout(resolve, 10000));
 const stats = await denseIndex.describeIndexStats();
 console.log(stats);
 
-// Define the query
+// Define the query (see quickstart guide for test query)
 const query = "Famous historical structures and monuments";
 
 // Search the dense index and rerank results
@@ -905,6 +854,8 @@ function buildRecommendationEngine() {
 
 ## 🚨 Common Mistakes (Must Avoid)
 
+> **For universal common mistakes**, see [PINECONE.md](./PINECONE.md#-common-mistakes-must-avoid). Below are TypeScript-specific examples.
+
 ### 1. **Nested Metadata** (will cause API errors)
 
 ```typescript
@@ -997,38 +948,16 @@ const results = await index.namespace("ns").searchRecords({
 console.log(results);
 ```
 
-## ⏳ Indexing Delays & Eventual Consistency (Important!)
+## ⏳ Indexing Delays & Eventual Consistency
 
 > **For complete information on eventual consistency**, see [PINECONE-troubleshooting.md](./PINECONE-troubleshooting.md#indexing-delays--eventual-consistency).
 
-Pinecone uses **eventual consistency**. This means records don't immediately appear in searches or stats after upserting.
+**Key Points:**
+- Records become searchable 5-10 seconds after upsert
+- Stats update 10-20 seconds after upsert
+- Always wait 10+ seconds before searching after upserting
 
-### Realistic Timing Expectations
-
-| Operation          | Time          | Notes                                       |
-| ------------------ | ------------- | ------------------------------------------- |
-| Record stored      | 1-3 seconds   | Data is persisted                           |
-| Records searchable | 5-10 seconds  | Can find via `searchRecords()`              |
-| Stats updated      | 10-20 seconds | `describeIndexStats()` shows accurate count |
-| Indexes ready      | 30-60 seconds | New indexes enter "Ready" state             |
-
-### Correct Wait Pattern
-
-```typescript
-// Upload records
-await index.namespace("ns").upsertRecords(records);
-
-// WRONG - 5 seconds is too short!
-// await new Promise(r => setTimeout(r, 5000));
-
-// ✅ CORRECT - wait 10+ seconds
-await new Promise((r) => setTimeout(r, 10000));
-
-// Now search will work
-const results = await index.namespace("ns").searchRecords({ ... });
-```
-
-### Production Pattern: Polling for Readiness
+**Production Pattern (TypeScript):**
 
 ```typescript
 async function waitForRecords(

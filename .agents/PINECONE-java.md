@@ -130,6 +130,8 @@ pc index create -n agentic-quickstart-test -m cosine -c aws -r us-east-1 --model
 
 2. **Upsert sample data:**
 
+> **Sample Data**: Use the sample data from [PINECONE-quickstart.md](./PINECONE-quickstart.md#sample-data-use-in-all-languages). Convert JSON format to Java Maps.
+
 ```java
 import io.pinecone.clients.Pinecone;
 import io.pinecone.clients.Index;
@@ -148,7 +150,7 @@ public class QuickStartExample {
         // Get the index (with integrated embeddings)
         Index index = client.getIndexConnection("agentic-quickstart-test");
 
-        // Sample records with text content (using integrated inference)
+        // Sample records (see quickstart guide for full list of 12 records)
         // Records are Maps with _id and text fields that match field_map
         List<Map<String, String>> records = Arrays.asList(
             Map.of(
@@ -161,11 +163,7 @@ public class QuickStartExample {
                 "content", "Photosynthesis allows plants to convert sunlight into energy.",
                 "category", "science"
             ),
-            Map.of(
-                "_id", "rec5",
-                "content", "Shakespeare wrote many famous plays, including Hamlet and Macbeth.",
-                "category", "literature"
-            )
+            // ... (use all 12 records from quickstart guide)
         );
 
         // Upsert the records into a namespace (embeddings generated automatically)
@@ -188,7 +186,7 @@ public class SearchExample {
         // Wait for the upserted records to be indexed (10+ seconds for eventual consistency)
         TimeUnit.SECONDS.sleep(10);
 
-        // Define the query text
+        // Define the query text (see quickstart guide for test query)
         String queryText = "Famous historical structures and monuments";
 
         // Configure reranking
@@ -933,6 +931,8 @@ public class RecommendationEngine {
 
 ## 🚨 Common Mistakes (Must Avoid)
 
+> **For universal common mistakes**, see [PINECONE.md](./PINECONE.md#-common-mistakes-must-avoid). Below are Java-specific examples.
+
 ### 1. **Nested Metadata** (will cause API errors)
 
 ```java
@@ -1023,38 +1023,17 @@ TimeUnit.SECONDS.sleep(10); // Wait for eventual consistency
 SearchRecordsResponse results = index.searchRecordsByText(...);
 ```
 
-## ⏳ Indexing Delays & Eventual Consistency (Important!)
+## ⏳ Indexing Delays & Eventual Consistency
 
 > **For complete information on eventual consistency**, see [PINECONE-troubleshooting.md](./PINECONE-troubleshooting.md#indexing-delays--eventual-consistency).
 
-Pinecone uses **eventual consistency**. This means records don't immediately appear in searches or stats after upserting.
+**Key Points:**
 
-### Realistic Timing Expectations
+- Records become searchable 5-10 seconds after upsert
+- Stats update 10-20 seconds after upsert
+- Always wait 10+ seconds before searching after upserting
 
-| Operation          | Time          | Notes                                       |
-| ------------------ | ------------- | ------------------------------------------- |
-| Record stored      | 1-3 seconds   | Data is persisted                           |
-| Records searchable | 5-10 seconds  | Can find via `query()`                      |
-| Stats updated      | 10-20 seconds | `describeIndexStats()` shows accurate count |
-| Indexes ready      | 30-60 seconds | New indexes enter "Ready" state             |
-
-### Correct Wait Pattern
-
-```java
-// Upload records
-index.upsertRecords(namespace, records);
-
-// WRONG - 5 seconds is too short!
-// TimeUnit.SECONDS.sleep(5);
-
-// ✅ CORRECT - wait 10+ seconds
-TimeUnit.SECONDS.sleep(10);
-
-// Now search will work
-SearchRecordsResponse results = index.searchRecordsByText(queryText, namespace, ...);
-```
-
-### Production Pattern: Polling for Readiness
+**Production Pattern (Java):**
 
 ```java
 public void waitForRecords(String namespace, int expectedCount, int maxWaitSeconds)

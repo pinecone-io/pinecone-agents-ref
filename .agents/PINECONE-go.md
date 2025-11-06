@@ -168,6 +168,8 @@ pc index create -n agentic-quickstart-test -m cosine -c aws -r us-east-1 --model
 
 2. **Upsert sample data:**
 
+> **Sample Data**: Use the sample data from [PINECONE-quickstart.md](./PINECONE-quickstart.md#sample-data-use-in-all-languages). Convert JSON format to Go structs.
+
 ```go
 package main
 
@@ -216,68 +218,19 @@ func main() {
         Host: idx.Host,
     })
 
-    // Sample records with text content (using integrated embeddings)
+    // Sample records (see quickstart guide for full list of 12 records)
     records := []*pinecone.IntegratedRecord{
         {
-            Id:      pinecone.StringPtr("rec1"),
-            Content: pinecone.StringPtr("The Eiffel Tower was completed in 1889 and stands in Paris, France."),
+            Id:       pinecone.StringPtr("rec1"),
+            Content:  pinecone.StringPtr("The Eiffel Tower was completed in 1889 and stands in Paris, France."),
             Category: pinecone.StringPtr("history"),
         },
         {
-            Id:      pinecone.StringPtr("rec2"),
-            Content: pinecone.StringPtr("Photosynthesis allows plants to convert sunlight into energy."),
+            Id:       pinecone.StringPtr("rec2"),
+            Content:  pinecone.StringPtr("Photosynthesis allows plants to convert sunlight into energy."),
             Category: pinecone.StringPtr("science"),
         },
-        {
-            Id:      pinecone.StringPtr("rec5"),
-            Content: pinecone.StringPtr("Shakespeare wrote many famous plays, including Hamlet and Macbeth."),
-            Category: pinecone.StringPtr("literature"),
-        },
-        {
-            Id:      pinecone.StringPtr("rec7"),
-            Content: pinecone.StringPtr("The Great Wall of China was built to protect against invasions."),
-            Category: pinecone.StringPtr("history"),
-        },
-        {
-            Id:      pinecone.StringPtr("rec15"),
-            Content: pinecone.StringPtr("Leonardo da Vinci painted the Mona Lisa."),
-            Category: pinecone.StringPtr("art"),
-        },
-        {
-            Id:      pinecone.StringPtr("rec17"),
-            Content: pinecone.StringPtr("The Pyramids of Giza are among the Seven Wonders of the Ancient World."),
-            Category: pinecone.StringPtr("history"),
-        },
-        {
-            Id:      pinecone.StringPtr("rec21"),
-            Content: pinecone.StringPtr("The Statue of Liberty was a gift from France to the United States."),
-            Category: pinecone.StringPtr("history"),
-        },
-        {
-            Id:      pinecone.StringPtr("rec26"),
-            Content: pinecone.StringPtr("Rome was once the center of a vast empire."),
-            Category: pinecone.StringPtr("history"),
-        },
-        {
-            Id:      pinecone.StringPtr("rec33"),
-            Content: pinecone.StringPtr("The violin is a string instrument commonly used in orchestras."),
-            Category: pinecone.StringPtr("music"),
-        },
-        {
-            Id:      pinecone.StringPtr("rec38"),
-            Content: pinecone.StringPtr("The Taj Mahal is a mausoleum built by Emperor Shah Jahan."),
-            Category: pinecone.StringPtr("history"),
-        },
-        {
-            Id:      pinecone.StringPtr("rec48"),
-            Content: pinecone.StringPtr("Vincent van Gogh painted Starry Night."),
-            Category: pinecone.StringPtr("art"),
-        },
-        {
-            Id:      pinecone.StringPtr("rec50"),
-            Content: pinecone.StringPtr("Renewable energy sources include wind, solar, and hydroelectric power."),
-            Category: pinecone.StringPtr("energy"),
-        },
+        // ... (use all 12 records from quickstart guide)
     }
 
     // Upsert the records into a namespace (embeddings generated automatically)
@@ -303,7 +256,7 @@ func searchExample(indexConn *pinecone.IndexConnection) {
     // Wait for the upserted records to be indexed (eventual consistency)
     time.Sleep(10 * time.Second)
 
-    // Define the query text
+    // Define the query text (see quickstart guide for test query)
     queryText := "Famous historical structures and monuments"
 
     // Search using text query with integrated inference and reranking
@@ -971,6 +924,8 @@ func loadConfig(configFile string) (*Config, error) {
 
 ## 🚨 Common Mistakes (Must Avoid)
 
+> **For universal common mistakes**, see [PINECONE.md](./PINECONE.md#-common-mistakes-must-avoid). Below are Go-specific examples.
+
 ### 1. **Nested Metadata** (will cause API errors)
 
 ```go
@@ -1080,49 +1035,16 @@ if !ok {
 }
 ```
 
-## ⏳ Indexing Delays & Eventual Consistency (Important!)
+## ⏳ Indexing Delays & Eventual Consistency
 
 > **For complete information on eventual consistency**, see [PINECONE-troubleshooting.md](./PINECONE-troubleshooting.md#indexing-delays--eventual-consistency).
 
-Pinecone uses **eventual consistency**. This means records don't immediately appear in searches or stats after upserting.
+**Key Points:**
+- Records become searchable 5-10 seconds after upsert
+- Stats update 10-20 seconds after upsert
+- Always wait 10+ seconds before searching after upserting
 
-### Realistic Timing Expectations
-
-| Operation          | Time          | Notes                                       |
-| ------------------ | ------------- | ------------------------------------------- |
-| Record stored      | 1-3 seconds   | Data is persisted                           |
-| Records searchable | 5-10 seconds  | Can find via `Query()`                      |
-| Stats updated      | 10-20 seconds | `DescribeIndexStats()` shows accurate count |
-| Indexes ready      | 30-60 seconds | New indexes enter "Ready" state             |
-
-### Correct Wait Pattern
-
-```go
-// Upload records
-ctx := context.Background()
-err := indexConn.WithNamespace(namespace).UpsertRecords(ctx, records)
-if err != nil {
-    return err
-}
-
-// WRONG - 5 seconds is too short!
-// time.Sleep(5 * time.Second)
-
-// ✅ CORRECT - wait 10+ seconds
-time.Sleep(10 * time.Second)
-
-// Now search will work
-results, err := indexConn.WithNamespace(namespace).SearchRecords(ctx, &pinecone.SearchRecordsRequest{
-    Query: &pinecone.SearchRecordsRequestQuery{
-        TopK: pinecone.Int32Ptr(10),
-        Inputs: map[string]interface{}{
-            "text": queryText,
-        },
-    },
-})
-```
-
-### Production Pattern: Polling for Readiness
+**Production Pattern (Go):**
 
 ```go
 func waitForRecords(indexConn *pinecone.IndexConnection, namespace string, expectedCount int, maxWaitSeconds int) error {
@@ -1164,9 +1086,6 @@ if err != nil {
 }
 
 err = waitForRecords(indexConn, "example-namespace", len(records), 300)
-if err != nil {
-    return err
-}
 ```
 
 ## 🆘 Troubleshooting
