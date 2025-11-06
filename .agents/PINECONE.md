@@ -146,11 +146,20 @@ For detailed CLI installation, authentication, and command reference, see [PINEC
 
 ### Upserting records (text with integrated embeddings)
 
-**Always use namespaces for data isolation:**
+**⚠️ MANDATORY: Always use namespaces for data isolation. Every upsert operation MUST specify a namespace.**
+
+**Namespace patterns:**
 
 - Multi-user apps: `user_123`
 - Session-based: `session_456`
 - Content-based: `knowledge_base`, `chat_history`
+
+**Before upserting, verify:**
+
+1. Namespace is specified (MANDATORY)
+2. Field names match `--field_map` from index creation (MANDATORY)
+3. Batch size limits respected (MANDATORY)
+4. Metadata is flat structure (MANDATORY)
 
 ### Updating records
 
@@ -168,11 +177,13 @@ Use paginated listing with optional prefix filters for efficient ID retrieval.
 
 ### Semantic search with reranking (best practice)
 
-**Always rerank for production quality:**
+**Best practice**: Reranking improves search quality. Quickstarts include reranking to demonstrate usage.
 
-- Get 2x candidates initially
+**Recommended pattern:**
+
+- Get 2x candidates initially (e.g., if you want 5 results, request 10)
 - Rerank with `bge-reranker-v2-m3` model
-- Return final count
+- Return final count (reranked results)
 
 ### Lexical search (keyword-based)
 
@@ -211,8 +222,8 @@ Use for exact keyword matching with optional required terms and reranking.
 
 ### 4. **Skipping Reranking** (reduces search quality)
 
-- ⚠️ OK but not optimal
-- ✅ Always rerank in production
+- ⚠️ **OK but not optimal** - Search works without reranking
+- ✅ **Best practice** - Use reranking in production with `bge-reranker-v2-m3` for better results
 
 ### 5. **Hardcoded API Keys**
 
@@ -281,4 +292,4 @@ For advanced features not covered in this quick reference:
 - **Error handling**: [https://docs.pinecone.io/guides/production/error-handling](https://docs.pinecone.io/guides/production/error-handling)
 - **Database limits**: [https://docs.pinecone.io/reference/api/database-limits](https://docs.pinecone.io/reference/api/database-limits)
 
-**Remember**: Always use namespaces, always rerank, always handle errors with retry logic.
+**Remember**: Always use namespaces, use reranking for best results (shown in quickstarts), always handle errors with retry logic.

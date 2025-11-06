@@ -4,6 +4,21 @@
 
 This guide provides Go-specific patterns, examples, and best practices for the Pinecone SDK.
 
+## 🚨 MANDATORY RULES - Read First
+
+**⚠️ CRITICAL: These rules MUST be followed. Violations will cause runtime errors or data issues.**
+
+1. **MUST use namespaces** - Every operation MUST use `.WithNamespace()` method
+2. **MUST wait 10+ seconds** - After upserting records, MUST wait 10+ seconds before searching
+3. **MUST match field_map** - Record field names MUST match the right side of `--field_map` used when creating index
+4. **MUST respect batch limits** - Text records: MAX 96 per batch, Vector records: MAX 1000 per batch
+5. **MUST use flat metadata** - No nested objects allowed, only flat key-value pairs
+6. **MUST use safe type assertions** - Use `ok` check: `val, ok := field.(string)`
+7. **MUST pass context** - All operations require `context.Context` parameter
+8. **MUST verify before installing** - Check if SDK/CLI already installed before prompting installation
+
+**Before proceeding with any operation, verify these rules are followed. See detailed sections below for implementation.**
+
 ## Installation & Setup
 
 > **⚠️ IMPORTANT**: See [PINECONE.md](./PINECONE.md#-mandatory-always-use-latest-version) for the mandatory requirement to always use the latest version when creating projects.
@@ -467,9 +482,11 @@ if err != nil {
 
 ### Semantic Search with Reranking (Best Practice)
 
+**Note**: Reranking is a best practice for production quality results. Quickstarts include reranking to demonstrate usage.
+
 ```go
 func searchWithRerank(indexConn *pinecone.IndexConnection, namespace string, queryText string, topK int) (*pinecone.SearchRecordsResponse, error) {
-    // Standard search pattern - always rerank for production
+    // Best practice: Use reranking for production quality results. This pattern is shown in quickstarts.
     ctx := context.Background()
     results, err := indexConn.WithNamespace(namespace).SearchRecords(ctx, &pinecone.SearchRecordsRequest{
         Query: &pinecone.SearchRecordsRequestQuery{

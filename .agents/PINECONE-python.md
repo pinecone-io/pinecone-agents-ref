@@ -4,6 +4,20 @@
 
 This guide provides Python-specific patterns, examples, and best practices for the Pinecone SDK.
 
+## 🚨 MANDATORY RULES - Read First
+
+**⚠️ CRITICAL: These rules MUST be followed. Violations will cause runtime errors or data issues.**
+
+1. **MUST use namespaces** - Every upsert, search, fetch, delete operation MUST specify a namespace
+2. **MUST wait 10+ seconds** - After upserting records, MUST wait 10+ seconds before searching
+3. **MUST match field_map** - Record field names MUST match the right side of `--field_map` used when creating index
+4. **MUST respect batch limits** - Text records: MAX 96 per batch, Vector records: MAX 1000 per batch
+5. **MUST use flat metadata** - No nested objects allowed, only flat key-value pairs
+6. **MUST use `pinecone` package** - NOT `pinecone-client` (deprecated, causes errors)
+7. **MUST verify before installing** - Check if SDK/CLI already installed before prompting installation
+
+**Before proceeding with any operation, verify these rules are followed. See detailed sections below for implementation.**
+
 ## Installation & Setup
 
 > **⚠️ IMPORTANT**: See [PINECONE.md](./PINECONE.md#-mandatory-always-use-latest-version) for the mandatory requirement to always use the latest version when creating projects.
@@ -269,6 +283,13 @@ for hit in reranked_results.result.hits:
 
 ### Upserting Records
 
+**⚠️ Before upserting, verify:**
+
+1. Namespace is specified (MANDATORY)
+2. Field names match `--field_map` used when creating index (MANDATORY)
+3. Batch size ≤ 96 records for text, ≤ 1000 for vectors (MANDATORY)
+4. Metadata is flat (no nested objects) (MANDATORY)
+
 ```python
 # Indexes with integrated embeddings
 records = [
@@ -370,9 +391,17 @@ docs_only = list_all_ids(index, "user_123", prefix="doc_")
 
 ### Semantic Search with Reranking (Best Practice)
 
+**⚠️ Before searching, verify:**
+
+1. Namespace is specified (MANDATORY)
+2. Wait 10+ seconds after upserting before searching (MANDATORY)
+3. Field name in query matches `--field_map` (MANDATORY)
+
+**Note**: Reranking is a best practice for production quality results. Quickstarts include reranking to demonstrate usage.
+
 ```python
 def search_with_rerank(index, namespace, query_text, top_k=5):
-    """Standard search pattern - always rerank for production"""
+    """Best practice: Use reranking for production quality results. This pattern is shown in quickstarts."""
     results = index.search(
         namespace=namespace,
         query={

@@ -4,6 +4,20 @@
 
 This guide provides Java-specific patterns, examples, and best practices for the Pinecone SDK.
 
+## 🚨 MANDATORY RULES - Read First
+
+**⚠️ CRITICAL: These rules MUST be followed. Violations will cause runtime errors or data issues.**
+
+1. **MUST use namespaces** - Every upsert, search, fetch, delete operation MUST specify a namespace parameter
+2. **MUST wait 10+ seconds** - After upserting records, MUST wait 10+ seconds before searching
+3. **MUST match field_map** - Record field names MUST match the right side of `--field_map` used when creating index
+4. **MUST respect batch limits** - Text records: MAX 96 per batch, Vector records: MAX 1000 per batch
+5. **MUST use flat metadata** - No nested objects allowed, only flat key-value pairs
+6. **MUST handle exceptions** - All operations can throw exceptions, MUST use try-catch
+7. **MUST verify before installing** - Check if SDK/CLI already installed before prompting installation
+
+**Before proceeding with any operation, verify these rules are followed. See detailed sections below for implementation.**
+
 ## Installation & Setup
 
 > **⚠️ IMPORTANT**: See [PINECONE.md](./PINECONE.md#-mandatory-always-use-latest-version) for the mandatory requirement to always use the latest version when creating projects.
@@ -363,6 +377,8 @@ List<String> docsOnly = listAllIds("user_123", "doc_");
 
 ### Semantic Search with Reranking (Best Practice)
 
+**Note**: Reranking is a best practice for production quality results. Quickstarts include reranking to demonstrate usage.
+
 ```java
 import io.pinecone.clients.Index;
 import org.openapitools.db_data.client.model.SearchRecordsRequestRerank;
@@ -370,7 +386,7 @@ import org.openapitools.db_data.client.model.SearchRecordsResponse;
 import java.util.*;
 
 public SearchRecordsResponse searchWithRerank(String namespace, String queryText, int topK) {
-    // Standard search pattern - always rerank for production
+    // Best practice: Use reranking for production quality results. This pattern is shown in quickstarts.
 
     // Configure reranking
     SearchRecordsRequestRerank rerank = new SearchRecordsRequestRerank()
@@ -985,7 +1001,7 @@ SearchRecordsResponse basicResults = index.searchRecordsByText(
     queryText, namespace, Arrays.asList("content"), 5, null, null
 );
 
-// ✅ BETTER - always rerank in production
+// ✅ BETTER - use reranking for best results (best practice)
 SearchRecordsRequestRerank rerank = new SearchRecordsRequestRerank()
     .model("bge-reranker-v2-m3")
     .topN(5)

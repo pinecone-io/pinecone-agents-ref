@@ -259,4 +259,4 @@ If you're still experiencing issues:
 
 ---
 
-**Remember**: Always use namespaces, always rerank, always handle errors with retry logic, and account for eventual consistency delays.
+**Remember**: Always use namespaces, use reranking for best results (shown in quickstarts), always handle errors with retry logic, and account for eventual consistency delays.
