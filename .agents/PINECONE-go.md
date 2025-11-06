@@ -129,8 +129,28 @@ func NewPineconeService() (*PineconeService, error) {
     }, nil
 }
 
-func (ps *PineconeService) GetIndex() *pinecone.Index {
-    return ps.client.Index(ps.indexName)
+func (ps *PineconeService) GetIndexConnection() (*pinecone.IndexConnection, error) {
+    ctx := context.Background()
+    indexes, err := ps.client.ListIndexes(ctx)
+    if err != nil {
+        return nil, fmt.Errorf("failed to list indexes: %w", err)
+    }
+
+    var idx *pinecone.Index
+    for _, i := range indexes {
+        if i.Name == ps.indexName {
+            idx = i
+            break
+        }
+    }
+
+    if idx == nil {
+        return nil, fmt.Errorf("index %s not found", ps.indexName)
+    }
+
+    return ps.client.Index(pinecone.NewIndexConnParams{
+        Host: idx.Host,
+    }), nil
 }
 ```
 
@@ -173,44 +193,95 @@ func main() {
         panic(fmt.Sprintf("Failed to create client: %v", err))
     }
 
-    // Sample records
-    records := []pinecone.Vector{
+    // Get index connection
+    ctx := context.Background()
+    indexes, err := client.ListIndexes(ctx)
+    if err != nil {
+        panic(fmt.Sprintf("Failed to list indexes: %v", err))
+    }
+
+    var idx *pinecone.Index
+    for _, i := range indexes {
+        if i.Name == "agentic-quickstart-test" {
+            idx = i
+            break
+        }
+    }
+
+    if idx == nil {
+        panic("Index agentic-quickstart-test not found")
+    }
+
+    indexConn := client.Index(pinecone.NewIndexConnParams{
+        Host: idx.Host,
+    })
+
+    // Sample records with text content (using integrated embeddings)
+    records := []*pinecone.IntegratedRecord{
         {
-            Id: "rec1",
-            Values: []float32{0.1, 0.2, 0.3},
-            Metadata: map[string]interface{}{
-                "content":  "The Eiffel Tower was completed in 1889 and stands in Paris, France.",
-                "category": "history",
-            },
+            Id:      pinecone.StringPtr("rec1"),
+            Content: pinecone.StringPtr("The Eiffel Tower was completed in 1889 and stands in Paris, France."),
+            Category: pinecone.StringPtr("history"),
         },
         {
-            Id: "rec2",
-            Values: []float32{0.4, 0.5, 0.6},
-            Metadata: map[string]interface{}{
-                "content":  "Photosynthesis allows plants to convert sunlight into energy.",
-                "category": "science",
-            },
+            Id:      pinecone.StringPtr("rec2"),
+            Content: pinecone.StringPtr("Photosynthesis allows plants to convert sunlight into energy."),
+            Category: pinecone.StringPtr("science"),
         },
         {
-            Id: "rec5",
-            Values: []float32{0.7, 0.8, 0.9},
-            Metadata: map[string]interface{}{
-                "content":  "Shakespeare wrote many famous plays, including Hamlet and Macbeth.",
-                "category": "literature",
-            },
+            Id:      pinecone.StringPtr("rec5"),
+            Content: pinecone.StringPtr("Shakespeare wrote many famous plays, including Hamlet and Macbeth."),
+            Category: pinecone.StringPtr("literature"),
+        },
+        {
+            Id:      pinecone.StringPtr("rec7"),
+            Content: pinecone.StringPtr("The Great Wall of China was built to protect against invasions."),
+            Category: pinecone.StringPtr("history"),
+        },
+        {
+            Id:      pinecone.StringPtr("rec15"),
+            Content: pinecone.StringPtr("Leonardo da Vinci painted the Mona Lisa."),
+            Category: pinecone.StringPtr("art"),
+        },
+        {
+            Id:      pinecone.StringPtr("rec17"),
+            Content: pinecone.StringPtr("The Pyramids of Giza are among the Seven Wonders of the Ancient World."),
+            Category: pinecone.StringPtr("history"),
+        },
+        {
+            Id:      pinecone.StringPtr("rec21"),
+            Content: pinecone.StringPtr("The Statue of Liberty was a gift from France to the United States."),
+            Category: pinecone.StringPtr("history"),
+        },
+        {
+            Id:      pinecone.StringPtr("rec26"),
+            Content: pinecone.StringPtr("Rome was once the center of a vast empire."),
+            Category: pinecone.StringPtr("history"),
+        },
+        {
+            Id:      pinecone.StringPtr("rec33"),
+            Content: pinecone.StringPtr("The violin is a string instrument commonly used in orchestras."),
+            Category: pinecone.StringPtr("music"),
+        },
+        {
+            Id:      pinecone.StringPtr("rec38"),
+            Content: pinecone.StringPtr("The Taj Mahal is a mausoleum built by Emperor Shah Jahan."),
+            Category: pinecone.StringPtr("history"),
+        },
+        {
+            Id:      pinecone.StringPtr("rec48"),
+            Content: pinecone.StringPtr("Vincent van Gogh painted Starry Night."),
+            Category: pinecone.StringPtr("art"),
+        },
+        {
+            Id:      pinecone.StringPtr("rec50"),
+            Content: pinecone.StringPtr("Renewable energy sources include wind, solar, and hydroelectric power."),
+            Category: pinecone.StringPtr("energy"),
         },
     }
 
-    // Target the index
-    index := client.Index("agentic-quickstart-test")
-
-    // Upsert the records into a namespace
-    ctx := context.Background()
-    _, err = index.Upsert(ctx, pinecone.UpsertParams{
-        Vectors:   records,
-        Namespace: "example-namespace",
-    })
-
+    // Upsert the records into a namespace (embeddings generated automatically)
+    err = indexConn.WithNamespace("example-namespace").UpsertRecords(ctx, records)
     if err != nil {
         panic(fmt.Sprintf("Failed to upsert: %v", err))
     }
@@ -224,43 +295,63 @@ import (
     "context"
     "fmt"
     "time"
+
+    "github.com/pinecone-io/go-pinecone/pinecone"
 )
 
-func searchExample() {
-    // Wait for the upserted vectors to be indexed
+func searchExample(indexConn *pinecone.IndexConnection) {
+    // Wait for the upserted records to be indexed (eventual consistency)
     time.Sleep(10 * time.Second)
 
-    // View stats for the index
+    // Define the query text
+    queryText := "Famous historical structures and monuments"
+
+    // Search using text query with integrated inference and reranking
     ctx := context.Background()
-    stats, err := index.DescribeIndexStats(ctx)
-    if err != nil {
-        panic(fmt.Sprintf("Failed to get stats: %v", err))
-    }
-    fmt.Printf("Stats: %+v\n", stats)
-
-    // Define the query
-    query := []float32{0.1, 0.2, 0.3} // This would be the actual query vector
-
-    // Search the dense index
-    results, err := index.Query(ctx, pinecone.QueryParams{
-        Vector:      query,
-        TopK:        10,
-        Namespace:   "example-namespace",
-        IncludeMetadata: true,
-        IncludeValues:   false,
+    results, err := indexConn.WithNamespace("example-namespace").SearchRecords(ctx, &pinecone.SearchRecordsRequest{
+        Query: &pinecone.SearchRecordsRequestQuery{
+            TopK: pinecone.Int32Ptr(10),
+            Inputs: map[string]interface{}{
+                "text": queryText,
+            },
+        },
+        Rerank: &pinecone.SearchRecordsRequestRerank{
+            Model:     pinecone.StringPtr("bge-reranker-v2-m3"),
+            TopN:      pinecone.Int32Ptr(10),
+            RankFields: []string{"content"},
+        },
     })
 
     if err != nil {
-        panic(fmt.Sprintf("Failed to query: %v", err))
+        panic(fmt.Sprintf("Failed to search: %v", err))
     }
 
-    // Print the results
-    for _, hit := range results.Matches {
-        fmt.Printf("id: %s | score: %.2f | category: %s | text: %s\n",
-            hit.Id,
-            hit.Score,
-            hit.Metadata["category"],
-            hit.Metadata["content"])
+    // Print the reranked results
+    if results.Result != nil {
+        for _, hit := range results.Result.Hits {
+            id := ""
+            if hit.Id != nil {
+                id = *hit.Id
+            }
+            score := 0.0
+            if hit.Score != nil {
+                score = *hit.Score
+            }
+
+            category := "unknown"
+            content := ""
+            if hit.Fields != nil {
+                if cat, ok := hit.Fields["category"].(string); ok {
+                    category = cat
+                }
+                if cont, ok := hit.Fields["content"].(string); ok {
+                    content = cont
+                }
+            }
+
+            fmt.Printf("id: %s | score: %.2f | category: %s | text: %s\n",
+                id, score, category, content)
+        }
     }
 }
 ```
@@ -270,30 +361,23 @@ func searchExample() {
 ### Upserting Records
 
 ```go
-func upsertRecords() error {
-    // Indexes with integrated embeddings
-    records := []pinecone.Vector{
+func upsertRecords(indexConn *pinecone.IndexConnection, namespace string) error {
+    // Indexes with integrated embeddings - use text records directly
+    records := []*pinecone.IntegratedRecord{
         {
-            Id: "doc1",
-            Values: []float32{0.1, 0.2, 0.3}, // vector values
-            Metadata: map[string]interface{}{
-                "content":    "Your text content here",
-                "category":   "documentation",
-                "created_at": "2025-01-01",
-                "priority":   "high",
-            },
+            Id:       pinecone.StringPtr("doc1"),
+            Content:  pinecone.StringPtr("Your text content here"), // must match field_map
+            Category: pinecone.StringPtr("documentation"),
+            CreatedAt: pinecone.StringPtr("2025-01-01"),
+            Priority: pinecone.StringPtr("high"),
         },
     }
 
     // Always use namespaces
-    namespace := "user_123" // e.g., "knowledge_base", "session_456"
+    // namespace := "user_123" // e.g., "knowledge_base", "session_456"
 
     ctx := context.Background()
-    _, err := index.Upsert(ctx, pinecone.UpsertParams{
-        Vectors:   records,
-        Namespace: namespace,
-    })
-
+    err := indexConn.WithNamespace(namespace).UpsertRecords(ctx, records)
     return err
 }
 ```
@@ -301,37 +385,28 @@ func upsertRecords() error {
 ### Updating Records
 
 ```go
-func updateRecords() error {
-    // Update existing records (use same upsert operation with existing IDs)
-    updatedRecords := []pinecone.Vector{
+func updateRecords(indexConn *pinecone.IndexConnection, namespace string) error {
+    // Update existing records (use same UpsertRecords operation with existing IDs)
+    updatedRecords := []*pinecone.IntegratedRecord{
         {
-            Id: "doc1", // existing record ID
-            Values: []float32{0.4, 0.5, 0.6},
-            Metadata: map[string]interface{}{
-                "content":       "Updated content here",
-                "category":      "updated_docs", // can change metadata
-                "last_modified": "2025-01-15",
-            },
+            Id:       pinecone.StringPtr("doc1"), // existing record ID
+            Content:  pinecone.StringPtr("Updated content here"),
+            Category: pinecone.StringPtr("updated_docs"), // can change fields
+            LastModified: pinecone.StringPtr("2025-01-15"),
         },
     }
 
     // Partial updates - only changed fields need to be included
-    partialUpdate := []pinecone.Vector{
+    partialUpdate := []*pinecone.IntegratedRecord{
         {
-            Id: "doc1",
-            Metadata: map[string]interface{}{
-                "category": "urgent", // only updating category field
-                "priority": "high",   // adding new field
-            },
+            Id:       pinecone.StringPtr("doc1"),
+            Category: pinecone.StringPtr("urgent"), // only updating category field
+            Priority: pinecone.StringPtr("high"),  // adding new field
         },
     }
 
     ctx := context.Background()
-    _, err := index.Upsert(ctx, pinecone.UpsertParams{
-        Vectors:   updatedRecords,
-        Namespace: namespace,
-    })
-
+    err := indexConn.WithNamespace(namespace).UpsertRecords(ctx, updatedRecords)
     return err
 }
 ```
@@ -339,89 +414,82 @@ func updateRecords() error {
 ### Fetching Records
 
 ```go
-func fetchRecords() error {
-    // Fetch single record
+func fetchRecords(indexConn *pinecone.IndexConnection, namespace string, ids []string) error {
     ctx := context.Background()
-    result, err := index.Fetch(ctx, pinecone.FetchParams{
-        Ids:       []string{"doc1"},
-        Namespace: namespace,
-    })
 
+    // Fetch records
+    result, err := indexConn.WithNamespace(namespace).Fetch(ctx, ids)
     if err != nil {
         return err
     }
 
-    if record, exists := result.Vectors["doc1"]; exists {
-        fmt.Printf("Content: %v\n", record.Metadata["content"])
-        fmt.Printf("Metadata: %+v\n", record.Metadata)
-    }
-
-    // Fetch multiple records
-    multiResult, err := index.Fetch(ctx, pinecone.FetchParams{
-        Ids:       []string{"doc1", "doc2", "doc3"},
-        Namespace: namespace,
-    })
-
-    if err != nil {
-        return err
-    }
-
-    for recordId, record := range multiResult.Vectors {
-        fmt.Printf("ID: %s, Content: %v\n", recordId, record.Metadata["content"])
+    if result.Records != nil {
+        for recordId, record := range result.Records {
+            if record != nil && record.Fields != nil {
+                content := ""
+                if cont, ok := record.Fields["content"].(string); ok {
+                    content = cont
+                }
+                fmt.Printf("ID: %s, Content: %s\n", recordId, content)
+            }
+        }
     }
 
     return nil
 }
 
 // Fetch with error handling
-func safeFetch(namespace string, ids []string) (map[string]pinecone.Vector, error) {
+func safeFetch(indexConn *pinecone.IndexConnection, namespace string, ids []string) (map[string]*pinecone.Record, error) {
     ctx := context.Background()
-    result, err := index.Fetch(ctx, pinecone.FetchParams{
-        Ids:       ids,
-        Namespace: namespace,
-    })
+    result, err := indexConn.WithNamespace(namespace).Fetch(ctx, ids)
 
     if err != nil {
         fmt.Printf("Fetch failed: %v\n", err)
         return nil, err
     }
 
-    return result.Vectors, nil
+    if result.Records != nil {
+        return result.Records, nil
+    }
+    return make(map[string]*pinecone.Record), nil
 }
 ```
 
 ### Listing Record IDs
 
 ```go
-func listAllIds(namespace string, prefix string) ([]string, error) {
+func listAllIds(indexConn *pinecone.IndexConnection, namespace string, prefix string) ([]string, error) {
     var allIds []string
-    var paginationToken string
+    var paginationToken *string
 
     for {
-        params := pinecone.ListParams{
-            Namespace: namespace,
-            Limit:     1000,
+        params := &pinecone.ListPaginatedRequest{
+            Limit: pinecone.Int32Ptr(1000),
         }
 
         if prefix != "" {
-            params.Prefix = prefix
+            params.Prefix = pinecone.StringPtr(prefix)
         }
 
-        if paginationToken != "" {
+        if paginationToken != nil {
             params.PaginationToken = paginationToken
         }
 
         ctx := context.Background()
-        result, err := index.List(ctx, params)
+        result, err := indexConn.WithNamespace(namespace).ListPaginated(ctx, params)
         if err != nil {
             return nil, err
         }
 
-        for _, vector := range result.Vectors {
-            allIds = append(allIds, vector.Id)
+        if result.Vectors != nil {
+            for _, vector := range result.Vectors {
+                if vector.Id != nil {
+                    allIds = append(allIds, *vector.Id)
+                }
+            }
         }
 
-        if result.Pagination == nil || result.Pagination.Next == "" {
+        if result.Pagination == nil || result.Pagination.Next == nil {
             break
         }
         paginationToken = result.Pagination.Next
@@ -431,12 +499,12 @@ func listAllIds(namespace string, prefix string) ([]string, error) {
 }
 
 // Usage
-allRecordIds, err := listAllIds("user_123", "")
+allRecordIds, err := listAllIds(indexConn, "user_123", "")
 if err != nil {
     panic(err)
 }
 
-docsOnly, err := listAllIds("user_123", "doc_")
+docsOnly, err := listAllIds(indexConn, "user_123", "doc_")
 if err != nil {
     panic(err)
 }
@@ -447,24 +515,24 @@ if err != nil {
 ### Semantic Search with Reranking (Best Practice)
 
 ```go
-func searchWithRerank(namespace string, queryVector []float32, topK int) (*pinecone.QueryResponse, error) {
+func searchWithRerank(indexConn *pinecone.IndexConnection, namespace string, queryText string, topK int) (*pinecone.SearchRecordsResponse, error) {
     // Standard search pattern - always rerank for production
     ctx := context.Background()
-    results, err := index.Query(ctx, pinecone.QueryParams{
-        Vector:         queryVector,
-        TopK:           topK * 2, // more candidates for reranking
-        Namespace:      namespace,
-        IncludeMetadata: true,
-        IncludeValues:   false,
+    results, err := indexConn.WithNamespace(namespace).SearchRecords(ctx, &pinecone.SearchRecordsRequest{
+        Query: &pinecone.SearchRecordsRequestQuery{
+            TopK: pinecone.Int32Ptr(int32(topK * 2)), // more candidates for reranking
+            Inputs: map[string]interface{}{
+                "text": queryText, // must match index config
+            },
+        },
+        Rerank: &pinecone.SearchRecordsRequestRerank{
+            Model:      pinecone.StringPtr("bge-reranker-v2-m3"),
+            TopN:       pinecone.Int32Ptr(int32(topK)),
+            RankFields: []string{"content"},
+        },
     })
 
-    if err != nil {
-        return nil, err
-    }
-
-    // Note: Reranking would need to be implemented separately
-    // or using Pinecone's hosted reranking features
-    return results, nil
+    return results, err
 }
 ```
 
@@ -472,37 +540,54 @@ func searchWithRerank(namespace string, queryVector []float32, topK int) (*pinec
 
 ```go
 // Basic lexical search
-func lexicalSearch(namespace string, queryVector []float32, topK int) (*pinecone.QueryResponse, error) {
-    // Keyword-based search using sparse embeddings
+func lexicalSearch(indexConn *pinecone.IndexConnection, namespace string, queryText string, topK int) (*pinecone.SearchRecordsResponse, error) {
+    // Keyword-based search using integrated inference
     ctx := context.Background()
-    results, err := index.Query(ctx, pinecone.QueryParams{
-        Vector:         queryVector,
-        TopK:           topK,
-        Namespace:      namespace,
-        IncludeMetadata: true,
-        IncludeValues:   false,
+    results, err := indexConn.WithNamespace(namespace).SearchRecords(ctx, &pinecone.SearchRecordsRequest{
+        Query: &pinecone.SearchRecordsRequestQuery{
+            Inputs: map[string]interface{}{
+                "text": queryText,
+            },
+            TopK: pinecone.Int32Ptr(int32(topK)),
+        },
     })
 
     return results, err
 }
 
 // Lexical search with required terms
-func lexicalSearchWithRequiredTerms(namespace string, queryVector []float32, requiredTerms []string, topK int) (*pinecone.QueryResponse, error) {
+func lexicalSearchWithRequiredTerms(indexConn *pinecone.IndexConnection, namespace string, queryText string, requiredTerms []string, topK int) (*pinecone.SearchRecordsResponse, error) {
     // Results must contain specific required words
-    filter := map[string]interface{}{
-        "$in": map[string]interface{}{
-            "content": requiredTerms,
-        },
-    }
-
     ctx := context.Background()
-    results, err := index.Query(ctx, pinecone.QueryParams{
-        Vector:         queryVector,
-        TopK:           topK,
-        Namespace:      namespace,
-        IncludeMetadata: true,
-        IncludeValues:   false,
-        Filter:         filter,
+    results, err := indexConn.WithNamespace(namespace).SearchRecords(ctx, &pinecone.SearchRecordsRequest{
+        Query: &pinecone.SearchRecordsRequestQuery{
+            Inputs: map[string]interface{}{
+                "text": queryText,
+            },
+            TopK:      pinecone.Int32Ptr(int32(topK)),
+            MatchTerms: requiredTerms, // results must contain these terms
+        },
+    })
+
+    return results, err
+}
+
+// Lexical search with reranking
+func lexicalSearchWithRerank(indexConn *pinecone.IndexConnection, namespace string, queryText string, topK int) (*pinecone.SearchRecordsResponse, error) {
+    // Lexical search with reranking for better relevance
+    ctx := context.Background()
+    results, err := indexConn.WithNamespace(namespace).SearchRecords(ctx, &pinecone.SearchRecordsRequest{
+        Query: &pinecone.SearchRecordsRequestQuery{
+            Inputs: map[string]interface{}{
+                "text": queryText,
+            },
+            TopK: pinecone.Int32Ptr(int32(topK * 2)), // get more candidates for reranking
+        },
+        Rerank: &pinecone.SearchRecordsRequestRerank{
+            Model:      pinecone.StringPtr("bge-reranker-v2-m3"),
+            TopN:       pinecone.Int32Ptr(int32(topK)),
+            RankFields: []string{"content"},
+        },
     })
 
     return results, err
@@ -512,7 +597,7 @@ func lexicalSearchWithRequiredTerms(namespace string, queryVector []float32, req
 ### Metadata Filtering
 
 ```go
-func searchWithFilters(namespace string, queryVector []float32) (*pinecone.QueryResponse, error) {
+func searchWithFilters(indexConn *pinecone.IndexConnection, namespace string, queryText string) (*pinecone.SearchRecordsResponse, error) {
     // Simple filters
     simpleFilter := map[string]interface{}{
         "category": "documentation",
@@ -540,53 +625,56 @@ func searchWithFilters(namespace string, queryVector []float32) (*pinecone.Query
     }
 
     ctx := context.Background()
-    results, err := index.Query(ctx, pinecone.QueryParams{
-        Vector:         queryVector,
-        TopK:           10,
-        Namespace:      namespace,
-        IncludeMetadata: true,
-        IncludeValues:   false,
-        Filter:         complexFilter,
+    results, err := indexConn.WithNamespace(namespace).SearchRecords(ctx, &pinecone.SearchRecordsRequest{
+        Query: &pinecone.SearchRecordsRequestQuery{
+            TopK: pinecone.Int32Ptr(10),
+            Inputs: map[string]interface{}{
+                "text": queryText,
+            },
+            Filter: complexFilter, // Filter goes inside query object
+        },
     })
 
     return results, err
 }
 
 // Search without filters - omit the filter property
-func searchWithoutFilters(namespace string, queryVector []float32) (*pinecone.QueryResponse, error) {
+func searchWithoutFilters(indexConn *pinecone.IndexConnection, namespace string, queryText string) (*pinecone.SearchRecordsResponse, error) {
     ctx := context.Background()
-    results, err := index.Query(ctx, pinecone.QueryParams{
-        Vector:         queryVector,
-        TopK:           10,
-        Namespace:      namespace,
-        IncludeMetadata: true,
-        IncludeValues:   false,
+    results, err := indexConn.WithNamespace(namespace).SearchRecords(ctx, &pinecone.SearchRecordsRequest{
+        Query: &pinecone.SearchRecordsRequestQuery{
+            TopK: pinecone.Int32Ptr(10),
+            Inputs: map[string]interface{}{
+                "text": queryText,
+            },
+            // No filter key at all
+        },
     })
 
     return results, err
 }
 
 // Dynamic filter pattern - conditionally add filter
-func searchWithDynamicFilter(namespace string, queryVector []float32, hasFilters bool) (*pinecone.QueryResponse, error) {
-    params := pinecone.QueryParams{
-        Vector:         queryVector,
-        TopK:           10,
-        Namespace:      namespace,
-        IncludeMetadata: true,
-        IncludeValues:   false,
+func searchWithDynamicFilter(indexConn *pinecone.IndexConnection, namespace string, queryText string, hasFilters bool) (*pinecone.SearchRecordsResponse, error) {
+    query := &pinecone.SearchRecordsRequestQuery{
+        TopK: pinecone.Int32Ptr(10),
+        Inputs: map[string]interface{}{
+            "text": queryText,
+        },
     }
 
     if hasFilters {
-        filter := map[string]interface{}{
+        query.Filter = map[string]interface{}{
             "category": map[string]interface{}{
                 "$eq": "docs",
             },
         }
-        params.Filter = filter
     }
 
     ctx := context.Background()
-    return index.Query(ctx, params)
+    return indexConn.WithNamespace(namespace).SearchRecords(ctx, &pinecone.SearchRecordsRequest{
+        Query: query,
+    })
 }
 ```
 
@@ -640,19 +728,18 @@ func extractStatusCode(err error) int {
 // Usage
 ctx := context.Background()
 err := exponentialBackoffRetry(ctx, func() error {
-    _, err := index.Upsert(ctx, pinecone.UpsertParams{
-        Vectors:   records,
-        Namespace: namespace,
-    })
-    return err
+    return indexConn.WithNamespace(namespace).UpsertRecords(ctx, records)
 }, 5)
 ```
 
 ## Batch Processing
 
 ```go
-func batchUpsert(namespace string, records []pinecone.Vector, batchSize int) error {
+func batchUpsert(indexConn *pinecone.IndexConnection, namespace string, records []*pinecone.IntegratedRecord, batchSize int) error {
     ctx := context.Background()
+
+    // Text records: MAX 96 per batch, 2MB total
+    // Adjust batchSize accordingly (typically 96 for text records)
 
     for i := 0; i < len(records); i += batchSize {
         end := i + batchSize
@@ -663,11 +750,7 @@ func batchUpsert(namespace string, records []pinecone.Vector, batchSize int) err
         batch := records[i:end]
 
         err := exponentialBackoffRetry(ctx, func() error {
-            _, err := index.Upsert(ctx, pinecone.UpsertParams{
-                Vectors:   batch,
-                Namespace: namespace,
-            })
-            return err
+            return indexConn.WithNamespace(namespace).UpsertRecords(ctx, batch)
         }, 5)
 
         if err != nil {
@@ -704,14 +787,23 @@ func (ps *PineconeService) indexExists(indexName string) bool {
 
 // Get stats (for monitoring/metrics)
 func (ps *PineconeService) printStats() error {
-    ctx := context.Background()
-    stats, err := ps.GetIndex().DescribeIndexStats(ctx)
+    indexConn, err := ps.GetIndexConnection()
     if err != nil {
         return err
     }
 
-    fmt.Printf("Total vectors: %d\n", stats.TotalVectorCount)
-    fmt.Printf("Namespaces: %v\n", stats.Namespaces)
+    ctx := context.Background()
+    stats, err := indexConn.DescribeIndexStats(ctx)
+    if err != nil {
+        return err
+    }
+
+    if stats.TotalRecordCount != nil {
+        fmt.Printf("Total records: %d\n", *stats.TotalRecordCount)
+    }
+    if stats.Namespaces != nil {
+        fmt.Printf("Namespaces: %v\n", stats.Namespaces)
+    }
 
     return nil
 }
@@ -721,18 +813,27 @@ func (ps *PineconeService) printStats() error {
 
 ```go
 func (ps *PineconeService) fetchRecords(namespace string, ids []string) error {
-    ctx := context.Background()
-    result, err := ps.GetIndex().Fetch(ctx, pinecone.FetchParams{
-        Ids:       ids,
-        Namespace: namespace,
-    })
-
+    indexConn, err := ps.GetIndexConnection()
     if err != nil {
         return err
     }
 
-    for recordId, record := range result.Vectors {
-        fmt.Printf("%s: %v\n", recordId, record.Metadata["content"])
+    ctx := context.Background()
+    result, err := indexConn.WithNamespace(namespace).Fetch(ctx, ids)
+    if err != nil {
+        return err
+    }
+
+    if result.Records != nil {
+        for recordId, record := range result.Records {
+            if record != nil && record.Fields != nil {
+                content := ""
+                if cont, ok := record.Fields["content"].(string); ok {
+                    content = cont
+                }
+                fmt.Printf("%s: %s\n", recordId, content)
+            }
+        }
     }
 
     return nil
@@ -740,30 +841,38 @@ func (ps *PineconeService) fetchRecords(namespace string, ids []string) error {
 
 // List all IDs (paginated)
 func (ps *PineconeService) listAllIds(namespace string) ([]string, error) {
+    indexConn, err := ps.GetIndexConnection()
+    if err != nil {
+        return nil, err
+    }
+
     var allIds []string
-    var paginationToken string
+    var paginationToken *string
 
     for {
-        params := pinecone.ListParams{
-            Namespace: namespace,
-            Limit:     1000,
+        params := &pinecone.ListPaginatedRequest{
+            Limit: pinecone.Int32Ptr(1000),
         }
 
-        if paginationToken != "" {
+        if paginationToken != nil {
             params.PaginationToken = paginationToken
         }
 
         ctx := context.Background()
-        result, err := ps.GetIndex().List(ctx, params)
+        result, err := indexConn.WithNamespace(namespace).ListPaginated(ctx, params)
         if err != nil {
             return nil, err
         }
 
-        for _, vector := range result.Vectors {
-            allIds = append(allIds, vector.Id)
+        if result.Vectors != nil {
+            for _, vector := range result.Vectors {
+                if vector.Id != nil {
+                    allIds = append(allIds, *vector.Id)
+                }
+            }
         }
 
-        if result.Pagination == nil || result.Pagination.Next == "" {
+        if result.Pagination == nil || result.Pagination.Next == nil {
             break
         }
         paginationToken = result.Pagination.Next
@@ -774,23 +883,25 @@ func (ps *PineconeService) listAllIds(namespace string) ([]string, error) {
 
 // Delete records
 func (ps *PineconeService) deleteRecords(namespace string, ids []string) error {
-    ctx := context.Background()
-    _, err := ps.GetIndex().Delete(ctx, pinecone.DeleteParams{
-        Ids:       ids,
-        Namespace: namespace,
-    })
+    indexConn, err := ps.GetIndexConnection()
+    if err != nil {
+        return err
+    }
 
+    ctx := context.Background()
+    err = indexConn.WithNamespace(namespace).DeleteMany(ctx, ids)
     return err
 }
 
 // Delete entire namespace
 func (ps *PineconeService) deleteNamespace(namespace string) error {
-    ctx := context.Background()
-    _, err := ps.GetIndex().Delete(ctx, pinecone.DeleteParams{
-        Namespace:  namespace,
-        DeleteAll: true,
-    })
+    indexConn, err := ps.GetIndexConnection()
+    if err != nil {
+        return err
+    }
 
+    ctx := context.Background()
+    err = indexConn.WithNamespace(namespace).DeleteAll(ctx)
     return err
 }
 ```
@@ -858,32 +969,379 @@ func loadConfig(configFile string) (*Config, error) {
 }
 ```
 
+## 🚨 Common Mistakes (Must Avoid)
+
+### 1. **Nested Metadata** (will cause API errors)
+
+```go
+// ❌ WRONG - nested objects not allowed
+badMetadata := map[string]interface{}{
+    "user": map[string]interface{}{
+        "name": "John",
+        "id":   123,
+    }, // Nested
+    "tags": []interface{}{
+        map[string]interface{}{"type": "urgent"}, // Nested in list
+    },
+}
+
+// ✅ CORRECT - flat structure only
+goodMetadata := map[string]interface{}{
+    "user_name": "John",
+    "user_id":   123,
+    "tags":      []string{"urgent", "important"}, // String lists OK
+}
+```
+
+### 2. **Batch Size Limits** (will cause API errors)
+
+```go
+// Vector records: MAX 1000 per batch, 2MB total
+// Adjust batchSize accordingly (typically 1000 for vector records)
+
+// ✅ CORRECT - respect limits
+func batchUpsert(namespace string, records []pinecone.Vector, batchSize int) error {
+    ctx := context.Background()
+    for i := 0; i < len(records); i += batchSize {
+        end := i + batchSize
+        if end > len(records) {
+            end = len(records)
+        }
+        batch := records[i:end]
+
+        _, err := index.Upsert(ctx, pinecone.UpsertParams{
+            Vectors:   batch,
+            Namespace: namespace,
+        })
+        if err != nil {
+            return err
+        }
+    }
+    return nil
+}
+```
+
+### 3. **Missing Namespaces** (causes data isolation issues)
+
+```go
+// ❌ WRONG - no namespace (default namespace not recommended)
+// index.Upsert(ctx, pinecone.UpsertParams{Vectors: records})
+
+// ✅ CORRECT - always use namespaces
+index.Upsert(ctx, pinecone.UpsertParams{
+    Vectors:   records,
+    Namespace: "user_123",
+})
+```
+
+### 4. **Hardcoded API Keys**
+
+```go
+// ❌ WRONG
+client, err := pinecone.NewClient(pinecone.NewClientParams{
+    ApiKey: "pc-abc123...",
+})
+
+// ✅ CORRECT
+apiKey := os.Getenv("PINECONE_API_KEY")
+if apiKey == "" {
+    return nil, fmt.Errorf("PINECONE_API_KEY required")
+}
+client, err := pinecone.NewClient(pinecone.NewClientParams{
+    ApiKey: apiKey,
+})
+```
+
+### 5. **Not Waiting for Indexing** (eventual consistency)
+
+```go
+// ❌ WRONG - search immediately after upsert
+ctx := context.Background()
+indexConn.WithNamespace(namespace).UpsertRecords(ctx, records)
+results, err := indexConn.WithNamespace(namespace).SearchRecords(ctx, &pinecone.SearchRecordsRequest{...}) // May return no results!
+
+// ✅ CORRECT - wait for indexing (10+ seconds)
+ctx := context.Background()
+indexConn.WithNamespace(namespace).UpsertRecords(ctx, records)
+time.Sleep(10 * time.Second) // Wait for eventual consistency
+results, err := indexConn.WithNamespace(namespace).SearchRecords(ctx, &pinecone.SearchRecordsRequest{...})
+```
+
+### 6. **Type Assertion Errors**
+
+```go
+// ❌ WRONG - unsafe type assertion
+category := hit.Metadata["category"].(string) // May panic if not string
+
+// ✅ CORRECT - safe type assertion with ok check
+category, ok := hit.Metadata["category"].(string)
+if !ok {
+    category = "unknown"
+}
+```
+
+## ⏳ Indexing Delays & Eventual Consistency (Important!)
+
+> **For complete information on eventual consistency**, see [PINECONE-troubleshooting.md](./PINECONE-troubleshooting.md#indexing-delays--eventual-consistency).
+
+Pinecone uses **eventual consistency**. This means records don't immediately appear in searches or stats after upserting.
+
+### Realistic Timing Expectations
+
+| Operation          | Time          | Notes                                       |
+| ------------------ | ------------- | ------------------------------------------- |
+| Record stored      | 1-3 seconds   | Data is persisted                           |
+| Records searchable | 5-10 seconds  | Can find via `Query()`                      |
+| Stats updated      | 10-20 seconds | `DescribeIndexStats()` shows accurate count |
+| Indexes ready      | 30-60 seconds | New indexes enter "Ready" state             |
+
+### Correct Wait Pattern
+
+```go
+// Upload records
+ctx := context.Background()
+err := indexConn.WithNamespace(namespace).UpsertRecords(ctx, records)
+if err != nil {
+    return err
+}
+
+// WRONG - 5 seconds is too short!
+// time.Sleep(5 * time.Second)
+
+// ✅ CORRECT - wait 10+ seconds
+time.Sleep(10 * time.Second)
+
+// Now search will work
+results, err := indexConn.WithNamespace(namespace).SearchRecords(ctx, &pinecone.SearchRecordsRequest{
+    Query: &pinecone.SearchRecordsRequestQuery{
+        TopK: pinecone.Int32Ptr(10),
+        Inputs: map[string]interface{}{
+            "text": queryText,
+        },
+    },
+})
+```
+
+### Production Pattern: Polling for Readiness
+
+```go
+func waitForRecords(indexConn *pinecone.IndexConnection, namespace string, expectedCount int, maxWaitSeconds int) error {
+    startTime := time.Now()
+    ctx := context.Background()
+
+    for time.Since(startTime) < time.Duration(maxWaitSeconds)*time.Second {
+        stats, err := indexConn.DescribeIndexStats(ctx)
+        if err != nil {
+            return err
+        }
+
+        count := 0
+        if stats.Namespaces != nil {
+            if nsStats, exists := stats.Namespaces[namespace]; exists {
+                if nsStats.RecordCount != nil {
+                    count = int(*nsStats.RecordCount)
+                }
+            }
+        }
+
+        if count >= expectedCount {
+            fmt.Printf("✓ All %d records indexed\n", count)
+            return nil
+        }
+
+        fmt.Printf("⏳ Indexed %d/%d records, waiting...\n", count, expectedCount)
+        time.Sleep(5 * time.Second) // Check every 5 seconds
+    }
+
+    return fmt.Errorf("timeout: records not fully indexed after %ds", maxWaitSeconds)
+}
+
+// Usage
+ctx := context.Background()
+err := indexConn.WithNamespace("example-namespace").UpsertRecords(ctx, records)
+if err != nil {
+    return err
+}
+
+err = waitForRecords(indexConn, "example-namespace", len(records), 300)
+if err != nil {
+    return err
+}
+```
+
+## 🆘 Troubleshooting
+
+> **For general troubleshooting issues** (search returns no results, rate limits, metadata errors, etc.), see [PINECONE-troubleshooting.md](./PINECONE-troubleshooting.md).
+
+### Problem: Search returns no results after upserting
+
+**Cause**: Eventual consistency - records not yet indexed
+
+**Solution**: Wait 10+ seconds after upsert before searching
+
+```go
+// ✅ CORRECT
+ctx := context.Background()
+err := indexConn.WithNamespace(namespace).UpsertRecords(ctx, records)
+if err != nil {
+    return err
+}
+
+time.Sleep(10 * time.Second)
+
+results, err := indexConn.WithNamespace(namespace).SearchRecords(ctx, &pinecone.SearchRecordsRequest{
+    Query: &pinecone.SearchRecordsRequestQuery{
+        TopK: pinecone.Int32Ptr(10),
+        Inputs: map[string]interface{}{
+            "text": queryText,
+        },
+    },
+})
+```
+
+### Problem: Metadata too large error
+
+**Cause**: Exceeding 40KB limit per record or nested objects
+
+**Solution**: Check metadata size and flatten nested structures
+
+```go
+// ❌ WRONG - nested objects
+badMetadata := map[string]interface{}{
+    "user": map[string]interface{}{
+        "name": "John",
+    }, // Nested
+}
+
+// ✅ CORRECT - flat structure
+goodMetadata := map[string]interface{}{
+    "user_name": "John", // Flat
+}
+```
+
+### Problem: Batch too large error
+
+**Cause**: Exceeding batch size limits (1000 for vectors)
+
+**Solution**: Reduce batch size
+
+```go
+// ✅ CORRECT - respect batch limits
+batchSize := 96 // For text records (MAX 96 per batch)
+ctx := context.Background()
+for i := 0; i < len(records); i += batchSize {
+    end := i + batchSize
+    if end > len(records) {
+        end = len(records)
+    }
+    batch := records[i:end]
+
+    err := indexConn.WithNamespace(namespace).UpsertRecords(ctx, batch)
+    if err != nil {
+        return err
+    }
+}
+```
+
+### Problem: Type assertion panics
+
+**Cause**: Metadata values may not be the expected type
+
+**Solution**: Use safe type assertions with ok checks
+
+```go
+// ❌ WRONG - unsafe assertion (if using old API)
+// category := hit.Metadata["category"].(string) // May panic
+
+// ✅ CORRECT - safe assertion with new API (Fields instead of Metadata)
+category := "unknown"
+if hit.Fields != nil {
+    if cat, ok := hit.Fields["category"].(string); ok {
+        category = cat
+    }
+}
+
+// ✅ BETTER - helper function
+func getStringFromFields(fields map[string]interface{}, key string, defaultValue string) string {
+    if fields == nil {
+        return defaultValue
+    }
+    if val, ok := fields[key].(string); ok {
+        return val
+    }
+    return defaultValue
+}
+
+category := getStringFromFields(hit.Fields, "category", "unknown")
+```
+
+For other troubleshooting issues, see [PINECONE-troubleshooting.md](./PINECONE-troubleshooting.md).
+
 ## Use Case Examples
 
 ### Semantic Search System
 
+**Create index with CLI:**
+
+```bash
+pc index create -n agentic-quickstart-search -m cosine -c aws -r us-east-1 --model llama-text-embed-v2 --field_map text=content
+```
+
+**Implementation:**
+
 ```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+
+    "github.com/pinecone-io/go-pinecone/pinecone"
+)
+
 type SemanticSearchSystem struct {
-    index *pinecone.Index
+    indexConn *pinecone.IndexConnection
 }
 
-func NewSemanticSearchSystem(client *pinecone.Client, indexName string) *SemanticSearchSystem {
-    return &SemanticSearchSystem{
-        index: client.Index(indexName),
+func NewSemanticSearchSystem(client *pinecone.Client, indexName string) (*SemanticSearchSystem, error) {
+    ctx := context.Background()
+    indexes, err := client.ListIndexes(ctx)
+    if err != nil {
+        return nil, fmt.Errorf("failed to list indexes: %w", err)
     }
+
+    var idx *pinecone.Index
+    for _, i := range indexes {
+        if i.Name == indexName {
+            idx = i
+            break
+        }
+    }
+
+    if idx == nil {
+        return nil, fmt.Errorf("index %s not found", indexName)
+    }
+
+    indexConn := client.Index(pinecone.NewIndexConnParams{
+        Host: idx.Host,
+    })
+
+    return &SemanticSearchSystem{
+        indexConn: indexConn,
+    }, nil
 }
 
-func (s *SemanticSearchSystem) SearchKnowledgeBase(query string, categoryFilter string, topK int) (*pinecone.QueryResponse, error) {
-    params := pinecone.QueryParams{
-        Vector:         convertToVector(query), // This would need to be implemented
-        TopK:           topK * 2,
-        Namespace:      "knowledge_base",
-        IncludeMetadata: true,
-        IncludeValues:   false,
+func (s *SemanticSearchSystem) SearchKnowledgeBase(query string, categoryFilter string, topK int) (*pinecone.SearchRecordsResponse, error) {
+    queryObj := &pinecone.SearchRecordsRequestQuery{
+        TopK: pinecone.Int32Ptr(int32(topK * 2)), // Get more candidates for reranking
+        Inputs: map[string]interface{}{
+            "text": query,
+        },
     }
 
     if categoryFilter != "" {
-        params.Filter = map[string]interface{}{
+        queryObj.Filter = map[string]interface{}{
             "category": map[string]interface{}{
                 "$eq": categoryFilter,
             },
@@ -891,50 +1349,111 @@ func (s *SemanticSearchSystem) SearchKnowledgeBase(query string, categoryFilter 
     }
 
     ctx := context.Background()
-    return s.index.Query(ctx, params)
-}
-
-func convertToVector(text string) []float32 {
-    // This would need to be implemented based on your embedding model
-    return []float32{0.1, 0.2, 0.3} // Placeholder
+    return s.indexConn.WithNamespace("knowledge_base").SearchRecords(ctx, &pinecone.SearchRecordsRequest{
+        Query: queryObj,
+        Rerank: &pinecone.SearchRecordsRequestRerank{
+            Model:      pinecone.StringPtr("bge-reranker-v2-m3"),
+            TopN:       pinecone.Int32Ptr(int32(topK)),
+            RankFields: []string{"content"},
+        },
+    })
 }
 ```
 
 ### Multi-Tenant RAG System
 
+**Create index with CLI:**
+
+```bash
+pc index create -n agentic-quickstart-rag -m cosine -c aws -r us-east-1 --model llama-text-embed-v2 --field_map text=content
+```
+
+**Implementation:**
+
 ```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+    "strings"
+
+    "github.com/pinecone-io/go-pinecone/pinecone"
+)
+
 type RagSystem struct {
-    index *pinecone.Index
+    indexConn *pinecone.IndexConnection
 }
 
-func NewRagSystem(client *pinecone.Client, indexName string) *RagSystem {
-    return &RagSystem{
-        index: client.Index(indexName),
+func NewRagSystem(client *pinecone.Client, indexName string) (*RagSystem, error) {
+    ctx := context.Background()
+    indexes, err := client.ListIndexes(ctx)
+    if err != nil {
+        return nil, fmt.Errorf("failed to list indexes: %w", err)
     }
+
+    var idx *pinecone.Index
+    for _, i := range indexes {
+        if i.Name == indexName {
+            idx = i
+            break
+        }
+    }
+
+    if idx == nil {
+        return nil, fmt.Errorf("index %s not found", indexName)
+    }
+
+    indexConn := client.Index(pinecone.NewIndexConnParams{
+        Host: idx.Host,
+    })
+
+    return &RagSystem{
+        indexConn: indexConn,
+    }, nil
 }
 
 func (r *RagSystem) RagQuery(userID string, query string, topK int) (string, error) {
     // Ensure namespace isolation
     namespace := fmt.Sprintf("user_%s", userID)
 
-    // Search only user's namespace
+    // Search only user's namespace with integrated inference and reranking
     ctx := context.Background()
-    results, err := r.index.Query(ctx, pinecone.QueryParams{
-        Vector:         convertToVector(query),
-        TopK:           topK * 2,
-        Namespace:      namespace,
-        IncludeMetadata: true,
-        IncludeValues:   false,
+    results, err := r.indexConn.WithNamespace(namespace).SearchRecords(ctx, &pinecone.SearchRecordsRequest{
+        Query: &pinecone.SearchRecordsRequestQuery{
+            TopK: pinecone.Int32Ptr(int32(topK * 2)), // Get more candidates for reranking
+            Inputs: map[string]interface{}{
+                "text": query,
+            },
+        },
+        Rerank: &pinecone.SearchRecordsRequestRerank{
+            Model:      pinecone.StringPtr("bge-reranker-v2-m3"),
+            TopN:       pinecone.Int32Ptr(int32(topK)),
+            RankFields: []string{"content"},
+        },
     })
 
     if err != nil {
         return "", err
     }
 
-    // Construct context for LLM
+    // Construct context for LLM with safe type assertions
     var context strings.Builder
-    for _, hit := range results.Matches {
-        context.WriteString(fmt.Sprintf("Document %s: %v\n", hit.Id, hit.Metadata["content"]))
+    if results.Result != nil && results.Result.Hits != nil {
+        for _, hit := range results.Result.Hits {
+            id := ""
+            if hit.Id != nil {
+                id = *hit.Id
+            }
+            content := ""
+            if hit.Fields != nil {
+                if cont, ok := hit.Fields["content"].(string); ok {
+                    content = cont
+                }
+            }
+            context.WriteString(fmt.Sprintf("Document %s: %s\n", id, content))
+        }
     }
 
     return context.String(), nil
@@ -943,63 +1462,243 @@ func (r *RagSystem) RagQuery(userID string, query string, topK int) (string, err
 
 ### Recommendation Engine
 
+**Create index with CLI:**
+
+```bash
+pc index create -n agentic-quickstart-recommendations -m cosine -c aws -r us-east-1 --model llama-text-embed-v2 --field_map text=content
+```
+
+**Implementation:**
+
 ```go
+package main
+
+import (
+    "context"
+    "fmt"
+    "os"
+
+    "github.com/pinecone-io/go-pinecone/pinecone"
+)
+
 type RecommendationEngine struct {
-    index *pinecone.Index
+    indexConn *pinecone.IndexConnection
 }
 
-func NewRecommendationEngine(client *pinecone.Client, indexName string) *RecommendationEngine {
-    return &RecommendationEngine{
-        index: client.Index(indexName),
-    }
-}
-
-func (r *RecommendationEngine) GetRecommendations(productID string, categoryFilter string, topK int) ([]pinecone.ScoredVector, error) {
-    // Get similar products
+func NewRecommendationEngine(client *pinecone.Client, indexName string) (*RecommendationEngine, error) {
     ctx := context.Background()
-    results, err := r.index.Query(ctx, pinecone.QueryParams{
-        Vector:         convertToVector(fmt.Sprintf("product_%s", productID)),
-        TopK:           topK * 2,
-        Namespace:      "products",
-        IncludeMetadata: true,
-        IncludeValues:   false,
+    indexes, err := client.ListIndexes(ctx)
+    if err != nil {
+        return nil, fmt.Errorf("failed to list indexes: %w", err)
+    }
+
+    var idx *pinecone.Index
+    for _, i := range indexes {
+        if i.Name == indexName {
+            idx = i
+            break
+        }
+    }
+
+    if idx == nil {
+        return nil, fmt.Errorf("index %s not found", indexName)
+    }
+
+    indexConn := client.Index(pinecone.NewIndexConnParams{
+        Host: idx.Host,
+    })
+
+    return &RecommendationEngine{
+        indexConn: indexConn,
+    }, nil
+}
+
+func (r *RecommendationEngine) GetRecommendations(productID string, categoryFilter string, topK int) ([]*pinecone.SearchResultHit, error) {
+    queryText := fmt.Sprintf("product description for %s", productID)
+
+    queryObj := &pinecone.SearchRecordsRequestQuery{
+        TopK: pinecone.Int32Ptr(int32(topK * 2)), // Get more candidates for reranking
+        Inputs: map[string]interface{}{
+            "text": queryText,
+        },
+    }
+
+    // Apply category filtering if specified
+    if categoryFilter != "" {
+        queryObj.Filter = map[string]interface{}{
+            "category": map[string]interface{}{
+                "$eq": categoryFilter,
+            },
+        }
+    }
+
+    ctx := context.Background()
+    results, err := r.indexConn.WithNamespace("products").SearchRecords(ctx, &pinecone.SearchRecordsRequest{
+        Query: queryObj,
+        Rerank: &pinecone.SearchRecordsRequestRerank{
+            Model:      pinecone.StringPtr("bge-reranker-v2-m3"),
+            TopN:       pinecone.Int32Ptr(int32(topK)),
+            RankFields: []string{"content"},
+        },
     })
 
     if err != nil {
         return nil, err
     }
 
-    // Apply category filtering if specified
-    if categoryFilter != "" {
-        var filteredResults []pinecone.ScoredVector
-        for _, hit := range results.Matches {
-            if hit.Metadata["category"] == categoryFilter {
-                filteredResults = append(filteredResults, hit)
-            }
+    // Return top K results
+    if results.Result != nil && results.Result.Hits != nil {
+        if len(results.Result.Hits) > topK {
+            return results.Result.Hits[:topK], nil
         }
-
-        if len(filteredResults) > topK {
-            filteredResults = filteredResults[:topK]
-        }
-
-        return filteredResults, nil
+        return results.Result.Hits, nil
     }
 
-    if len(results.Matches) > topK {
-        return results.Matches[:topK], nil
-    }
-
-    return results.Matches, nil
+    return []*pinecone.SearchResultHit{}, nil
 }
 ```
 
-## HTTP Server Integration
+## Go Ecosystem Integration
+
+### Gin Framework Integration
 
 ```go
+package main
+
+import (
+    "net/http"
+    "os"
+
+    "github.com/gin-gonic/gin"
+    "github.com/pinecone-io/go-pinecone/pinecone"
+)
+
+type SearchRequest struct {
+    Query    string `json:"query" binding:"required"`
+    Category string `json:"category"`
+    TopK     int    `json:"top_k"`
+}
+
+func setupSearchHandler(router *gin.Engine, searchSystem *SemanticSearchSystem) {
+    router.POST("/search", func(c *gin.Context) {
+        var req SearchRequest
+        if err := c.ShouldBindJSON(&req); err != nil {
+            c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+            return
+        }
+
+        if req.TopK == 0 {
+            req.TopK = 5 // Default
+        }
+
+        results, err := searchSystem.SearchKnowledgeBase(req.Query, req.Category, req.TopK)
+        if err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": "Search failed"})
+            return
+        }
+
+        c.JSON(http.StatusOK, results)
+    })
+}
+
+func main() {
+    apiKey := os.Getenv("PINECONE_API_KEY")
+    if apiKey == "" {
+        panic("PINECONE_API_KEY required")
+    }
+
+    client, err := pinecone.NewClient(pinecone.NewClientParams{ApiKey: apiKey})
+    if err != nil {
+        panic(err)
+    }
+
+    searchSystem := NewSemanticSearchSystem(client, "my-index")
+
+    router := gin.Default()
+    setupSearchHandler(router, searchSystem)
+    router.Run(":8080")
+}
+```
+
+### Echo Framework Integration
+
+```go
+package main
+
+import (
+    "net/http"
+    "os"
+
+    "github.com/labstack/echo/v4"
+    "github.com/pinecone-io/go-pinecone/pinecone"
+)
+
+type SearchRequest struct {
+    Query    string `json:"query"`
+    Category string `json:"category"`
+    TopK     int    `json:"top_k"`
+}
+
+func setupSearchHandler(e *echo.Echo, searchSystem *SemanticSearchSystem) {
+    e.POST("/search", func(c echo.Context) error {
+        var req SearchRequest
+        if err := c.Bind(&req); err != nil {
+            return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+        }
+
+        if req.TopK == 0 {
+            req.TopK = 5 // Default
+        }
+
+        results, err := searchSystem.SearchKnowledgeBase(req.Query, req.Category, req.TopK)
+        if err != nil {
+            return c.JSON(http.StatusInternalServerError, map[string]string{"error": "Search failed"})
+        }
+
+        return c.JSON(http.StatusOK, results)
+    })
+}
+
+func main() {
+    apiKey := os.Getenv("PINECONE_API_KEY")
+    if apiKey == "" {
+        panic("PINECONE_API_KEY required")
+    }
+
+    client, err := pinecone.NewClient(pinecone.NewClientParams{ApiKey: apiKey})
+    if err != nil {
+        panic(err)
+    }
+
+    searchSystem, err := NewSemanticSearchSystem(client, "my-index")
+    if err != nil {
+        panic(err)
+    }
+
+    e := echo.New()
+    setupSearchHandler(e, searchSystem)
+    e.Start(":8080")
+}
+```
+
+### Standard HTTP Server Integration
+
+```go
+package main
+
 import (
     "encoding/json"
     "net/http"
+    "os"
+
+    "github.com/pinecone-io/go-pinecone/pinecone"
 )
+
+type SearchRequest struct {
+    Query    string `json:"query"`
+    Category string `json:"category"`
+    TopK     int    `json:"top_k"`
+}
 
 type SearchHandler struct {
     searchSystem *SemanticSearchSystem
@@ -1017,15 +1716,14 @@ func (h *SearchHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
         return
     }
 
-    var req struct {
-        Query    string `json:"query"`
-        Category string `json:"category"`
-        TopK     int    `json:"top_k"`
-    }
-
+    var req SearchRequest
     if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
         http.Error(w, "Invalid JSON", http.StatusBadRequest)
         return
+    }
+
+    if req.TopK == 0 {
+        req.TopK = 5 // Default
     }
 
     results, err := h.searchSystem.SearchKnowledgeBase(req.Query, req.Category, req.TopK)
@@ -1037,35 +1735,22 @@ func (h *SearchHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
     w.Header().Set("Content-Type", "application/json")
     json.NewEncoder(w).Encode(results)
 }
-```
 
-## Configuration Files
-
-```json
-// config.json
-{
-  "pinecone_api_key": "your-api-key",
-  "pinecone_index": "default-index"
-}
-```
-
-```go
-// main.go
 func main() {
-    config, err := loadConfig("config.json")
+    apiKey := os.Getenv("PINECONE_API_KEY")
+    if apiKey == "" {
+        panic("PINECONE_API_KEY required")
+    }
+
+    client, err := pinecone.NewClient(pinecone.NewClientParams{ApiKey: apiKey})
     if err != nil {
         panic(err)
     }
 
-    client, err := pinecone.NewClient(pinecone.NewClientParams{
-        ApiKey: config.PineconeAPIKey,
-    })
+    searchSystem, err := NewSemanticSearchSystem(client, "my-index")
     if err != nil {
         panic(err)
     }
-
-    searchSystem := NewSemanticSearchSystem(client, config.PineconeIndex)
-
     http.Handle("/search", NewSearchHandler(searchSystem))
     http.ListenAndServe(":8080", nil)
 }
