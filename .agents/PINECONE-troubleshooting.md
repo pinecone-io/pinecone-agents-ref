@@ -17,7 +17,7 @@ This guide covers common troubleshooting issues that apply across all programmin
 
 **Solution**:
 
-1. Wait 10+ seconds minimum after upserting records
+1. Wait 10+ seconds minimum after upserting records (include wait logic in generated code, not in terminal commands)
 2. Check if records were actually upserted (no errors thrown)
 3. Use a polling pattern for production code (see language-specific guides for examples)
 
@@ -58,6 +58,7 @@ This guide covers common troubleshooting issues that apply across all programmin
 
 4. **Wait for indexing**:
    - Records become searchable 5-10 seconds after upsert
+   - Include wait logic in generated code (not terminal commands)
    - Use polling pattern in production code
    - See [Indexing Delays & Eventual Consistency](#indexing-delays--eventual-consistency) below
 
@@ -203,6 +204,8 @@ This guide covers common troubleshooting issues that apply across all programmin
 
 ## Indexing Delays & Eventual Consistency
 
+> **⚠️ IMPORTANT FOR AGENTS**: The wait instructions below apply **ONLY to generated code**, not to the agent's own behavior. When generating code that upserts records and then queries them, include wait logic in the generated code. **DO NOT** execute `sleep` commands in the terminal yourself.
+
 Pinecone uses **eventual consistency**. This means records don't immediately appear in searches or stats after upserting.
 
 ### Realistic Timing Expectations
@@ -221,6 +224,8 @@ After upserting records:
 1. **Minimum wait**: 10 seconds for records to become searchable
 2. **Stats wait**: 10-20 seconds for stats to update
 3. **Production pattern**: Use polling with `describeIndexStats()` to verify readiness
+
+**Note**: Include wait logic in generated code (e.g., `time.sleep(10)` in Python, `TimeUnit.SECONDS.sleep(10)` in Java). Do not execute sleep commands in the terminal.
 
 See language-specific guides for polling pattern code examples.
 

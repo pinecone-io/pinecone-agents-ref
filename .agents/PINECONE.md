@@ -239,7 +239,7 @@ Use for exact keyword matching with optional required terms and reranking.
 | Vector batch size   | 1000 records                               | Also 2MB total per batch          |
 | Query response size | 4MB                                        | Per query response                |
 | Metadata types      | strings, ints, floats, bools, string lists | No nested structures              |
-| Consistency         | Eventually consistent                      | Wait ~1-5s after upsert           |
+| Consistency         | Eventually consistent                      | Wait ~1-5s after upsert (include in generated code, not terminal commands) |
 
 ## Error Handling (Production)
 

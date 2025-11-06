@@ -1028,12 +1028,14 @@ Pinecone client = new Pinecone.Builder(apiKey).build();
 
 ### 6. **Not Waiting for Indexing** (eventual consistency)
 
+> **⚠️ IMPORTANT FOR AGENTS**: Include wait logic in generated code (e.g., `TimeUnit.SECONDS.sleep(10)`). **DO NOT** execute `sleep` commands in the terminal yourself.
+
 ```java
 // ❌ WRONG - search immediately after upsert
 index.upsertRecords(namespace, records);
 SearchRecordsResponse results = index.searchRecordsByText(...); // May return no results!
 
-// ✅ CORRECT - wait for indexing (10+ seconds)
+// ✅ CORRECT - wait for indexing (10+ seconds) - include in generated code
 index.upsertRecords(namespace, records);
 TimeUnit.SECONDS.sleep(10); // Wait for eventual consistency
 SearchRecordsResponse results = index.searchRecordsByText(...);
@@ -1041,13 +1043,15 @@ SearchRecordsResponse results = index.searchRecordsByText(...);
 
 ## ⏳ Indexing Delays & Eventual Consistency
 
+> **⚠️ IMPORTANT FOR AGENTS**: The wait instructions below apply **ONLY to generated code**, not to the agent's own behavior. Include wait logic in the code you generate. **DO NOT** execute `sleep` commands in the terminal yourself.
+
 > **For complete information on eventual consistency**, see [PINECONE-troubleshooting.md](./PINECONE-troubleshooting.md#indexing-delays--eventual-consistency).
 
 **Key Points:**
 
 - Records become searchable 5-10 seconds after upsert
 - Stats update 10-20 seconds after upsert
-- Always wait 10+ seconds before searching after upserting
+- Always wait 10+ seconds before searching after upserting (include wait logic in generated code)
 
 **Production Pattern (Java):**
 
@@ -1091,10 +1095,10 @@ waitForRecords("example-namespace", records.size(), 300);
 
 **Cause**: Eventual consistency - records not yet indexed
 
-**Solution**: Wait 10+ seconds after upsert before searching
+**Solution**: Wait 10+ seconds after upsert before searching (include wait logic in generated code)
 
 ```java
-// ✅ CORRECT
+// ✅ CORRECT - include wait in generated code
 index.upsertRecords(namespace, records);
 TimeUnit.SECONDS.sleep(10);
 SearchRecordsResponse results = index.searchRecordsByText(queryText, namespace, ...);

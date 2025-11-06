@@ -967,12 +967,14 @@ console.log(results);
 
 ## ⏳ Indexing Delays & Eventual Consistency
 
+> **⚠️ IMPORTANT FOR AGENTS**: The wait instructions below apply **ONLY to generated code**, not to the agent's own behavior. Include wait logic in the code you generate (e.g., `await new Promise(r => setTimeout(r, 10000))`). **DO NOT** execute `sleep` commands in the terminal yourself.
+
 > **For complete information on eventual consistency**, see [PINECONE-troubleshooting.md](./PINECONE-troubleshooting.md#indexing-delays--eventual-consistency).
 
 **Key Points:**
 - Records become searchable 5-10 seconds after upsert
 - Stats update 10-20 seconds after upsert
-- Always wait 10+ seconds before searching after upserting
+- Always wait 10+ seconds before searching after upserting (include wait logic in generated code)
 
 **Production Pattern (TypeScript):**
 

@@ -1026,13 +1026,15 @@ client, err := pinecone.NewClient(pinecone.NewClientParams{
 
 ### 5. **Not Waiting for Indexing** (eventual consistency)
 
+> **⚠️ IMPORTANT FOR AGENTS**: Include wait logic in generated code (e.g., `time.Sleep(10 * time.Second)`). **DO NOT** execute `sleep` commands in the terminal yourself.
+
 ```go
 // ❌ WRONG - search immediately after upsert
 ctx := context.Background()
 indexConn.WithNamespace(namespace).UpsertRecords(ctx, records)
 results, err := indexConn.WithNamespace(namespace).SearchRecords(ctx, &pinecone.SearchRecordsRequest{...}) // May return no results!
 
-// ✅ CORRECT - wait for indexing (10+ seconds)
+// ✅ CORRECT - wait for indexing (10+ seconds) - include in generated code
 ctx := context.Background()
 indexConn.WithNamespace(namespace).UpsertRecords(ctx, records)
 time.Sleep(10 * time.Second) // Wait for eventual consistency
@@ -1054,12 +1056,14 @@ if !ok {
 
 ## ⏳ Indexing Delays & Eventual Consistency
 
+> **⚠️ IMPORTANT FOR AGENTS**: The wait instructions below apply **ONLY to generated code**, not to the agent's own behavior. Include wait logic in the code you generate. **DO NOT** execute `sleep` commands in the terminal yourself.
+
 > **For complete information on eventual consistency**, see [PINECONE-troubleshooting.md](./PINECONE-troubleshooting.md#indexing-delays--eventual-consistency).
 
 **Key Points:**
 - Records become searchable 5-10 seconds after upsert
 - Stats update 10-20 seconds after upsert
-- Always wait 10+ seconds before searching after upserting
+- Always wait 10+ seconds before searching after upserting (include wait logic in generated code)
 
 **Production Pattern (Go):**
 
@@ -1113,10 +1117,10 @@ err = waitForRecords(indexConn, "example-namespace", len(records), 300)
 
 **Cause**: Eventual consistency - records not yet indexed
 
-**Solution**: Wait 10+ seconds after upsert before searching
+**Solution**: Wait 10+ seconds after upsert before searching (include wait logic in generated code)
 
 ```go
-// ✅ CORRECT
+// ✅ CORRECT - include wait in generated code
 ctx := context.Background()
 err := indexConn.WithNamespace(namespace).UpsertRecords(ctx, records)
 if err != nil {
