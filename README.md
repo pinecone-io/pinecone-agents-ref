@@ -108,6 +108,31 @@ Add-Content -Path CLAUDE.md -Value (Get-Content AGENTS-pinecone-snippet.md)
 Remove-Item AGENTS-pinecone-snippet.md
 ```
 
+### Gemini CLI
+
+Gemini CLI uses `GEMINI.md` context files instead of `AGENTS.md`. These files are loaded hierarchically from your project root and provide instructions to the AI assistant.
+
+**Linux/macOS (Bash/Zsh):**
+
+```bash
+curl -L -o agents.zip https://github.com/pinecone-io/pinecone-agents-ref/releases/latest/download/agents.zip
+unzip agents.zip && rm agents.zip
+touch GEMINI.md && cat AGENTS-pinecone-snippet.md >> GEMINI.md && rm AGENTS-pinecone-snippet.md
+```
+
+**Windows (PowerShell):**
+
+```powershell
+Invoke-WebRequest -Uri https://github.com/pinecone-io/pinecone-agents-ref/releases/latest/download/agents.zip -OutFile agents.zip
+Expand-Archive -Path agents.zip -DestinationPath . -Force
+Remove-Item agents.zip
+if (-not (Test-Path GEMINI.md)) { New-Item -Path GEMINI.md -ItemType File }
+Add-Content -Path GEMINI.md -Value (Get-Content AGENTS-pinecone-snippet.md)
+Remove-Item AGENTS-pinecone-snippet.md
+```
+
+**Note:** Gemini CLI automatically loads `GEMINI.md` files from your project root. The context file contains instructions that tell the AI to read the `.agents/PINECONE.md` file when needed. You can also place context files in subdirectories for more specific instructions. Use `/memory refresh` in Gemini CLI to reload context files if needed.
+
 That's it! Your project now has the `.agents/` folder with all Pinecone documentation and your configuration file has been updated.
 
 ### Important: Allow Re-indexing
@@ -117,7 +142,9 @@ Many coding assistants need to re-index your codebase to recognize the new `.age
 - **Wait a few moments** for automatic re-indexing to complete, or
 - **Manually trigger a re-index** (if your assistant provides this option)
 
-If you start using Pinecone features immediately after installation, your assistant may not yet have access to the Pinecone documentation. Once re-indexing is complete, your assistant will automatically reference the `.agents/PINECONE.md` files when you ask questions about Pinecone.
+**For Gemini CLI users:** After installation, use the `/memory refresh` command to reload context files. This ensures the CLI picks up your new `GEMINI.md` file and the `.agents/` folder.
+
+If you start using Pinecone features immediately after installation, your assistant may not yet have access to the Pinecone documentation. Once re-indexing is complete (or after running `/memory refresh` in Gemini CLI), your assistant will automatically reference the `.agents/PINECONE.md` files when you ask questions about Pinecone.
 
 ### Verify Installation
 
@@ -135,21 +162,23 @@ your-project/
 │   ├── PINECONE-java.md             # Java SDK guide
 │   └── PINECONE-troubleshooting.md  # Troubleshooting guide
 └── AGENTS.md                        # Your project's agent guide (with Pinecone section)
+    # or CLAUDE.md for Claude Code
+    # or GEMINI.md for Gemini CLI
 
 ```
 
 ### Customizing the Integration
 
-The third command appends `AGENTS-pinecone-snippet.md` to your `AGENTS.md`. If you already have an `AGENTS.md` file and want more control over where the Pinecone section is placed:
+The installation commands append the appropriate snippet file to your configuration file. If you already have a configuration file and want more control over where the Pinecone section is placed:
 
 1. Extract the archive: `unzip agents.zip && rm agents.zip`
 2. Open `AGENTS-pinecone-snippet.md` and copy the "Pinecone (Vector Database)" section
-3. Manually add it to your `AGENTS.md` where you prefer
-4. Remove the snippet file: `rm AGENTS-pinecone-snippet.md`
+3. Manually add it to your configuration file (`AGENTS.md`, `CLAUDE.md`, or `GEMINI.md`) where you prefer
+4. Remove the snippet file
 
 ## Updating
 
-To update to a newer version, simply download the latest release and extract the archive. Your configuration file (`AGENTS.md` or `CLAUDE.md` if using Claude Code) typically doesn't need changes unless the structure changes.
+To update to a newer version, simply download the latest release and extract the archive. Your configuration file (`AGENTS.md`, `CLAUDE.md`, or `GEMINI.md`) typically doesn't need changes unless the structure changes.
 
 **Linux/macOS (Bash/Zsh):**
 
@@ -203,7 +232,7 @@ The workflow triggers automatically on tag push (`push: tags: v*`) and:
    - If no release exists → creates a new release automatically
 3. Packages the following files:
    - All files from `.agents/` folder (8 Pinecone documentation files)
-   - `AGENTS-pinecone-snippet.md` file
+   - `AGENTS-pinecone-snippet.md` file (works for all assistants including Gemini CLI)
 4. Creates archives with the structure:
    ```
    archive/
