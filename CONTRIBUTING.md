@@ -60,6 +60,14 @@ This documentation is consumed by AI assistants, so every token counts:
 - Update `PINECONE.md` navigation when adding files
 - Keep related content together
 
+### Link Verification
+
+If your changes add or modify any URLs:
+
+- **Run the link checker**: `python3 utils/check_links.py --recursive`
+- **Fix broken links** before submitting
+- See `utils/README_check_links.md` for usage details
+
 ## Testing
 
 **Critical**: All changes must be tested with an actual coding assistant to verify the instructions work.
@@ -100,6 +108,7 @@ This documentation is consumed by AI assistants, so every token counts:
 - [ ] Assistant provides accurate information
 - [ ] No confusion or incorrect guidance observed
 - [ ] Code examples work when tested
+- [ ] URLs verified (if any URLs were added/modified): `python3 utils/check_links.py --recursive`
 
 ## Pull Request Process
 
@@ -118,7 +127,14 @@ This documentation is consumed by AI assistants, so every token counts:
    - Verify markdown renders correctly
    - Test code examples
    - **Test with a coding assistant** (required)
-   - Check for broken links
+   - **Check URLs** - If you added or modified any URLs, verify them using `utils/check_links.py`:
+     ```bash
+     python3 utils/check_links.py --recursive
+     ```
+     Or check specific files:
+     ```bash
+     python3 utils/check_links.py --files path/to/file.md
+     ```
 
 4. **Commit**:
 
