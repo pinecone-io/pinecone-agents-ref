@@ -167,21 +167,33 @@ pinecone = "*"
 
 ### Environment Configuration
 
+**⚠️ Use `.env` files (see [PINECONE.md](./PINECONE.md#-environment-variables--security-best-practices)).**
+
+```bash
+pip install python-dotenv
+```
+
 ```python
 import os
+from dotenv import load_dotenv
 from pinecone import Pinecone
 
-# Initialize Pinecone client
+load_dotenv()  # Loads .env file
 api_key = os.getenv("PINECONE_API_KEY")
 if not api_key:
-    raise ValueError("PINECONE_API_KEY environment variable not set")
-
+    raise ValueError("PINECONE_API_KEY required")
 pc = Pinecone(api_key=api_key)
 ```
 
 ### Production Client Class
 
 ```python
+import os
+from dotenv import load_dotenv
+from pinecone import Pinecone
+
+load_dotenv()
+
 class PineconeClient:
     def __init__(self):
         self.api_key = os.getenv("PINECONE_API_KEY")
@@ -189,7 +201,6 @@ class PineconeClient:
             raise ValueError("PINECONE_API_KEY required")
         self.pc = Pinecone(api_key=self.api_key)
         self.index_name = os.getenv("PINECONE_INDEX", "default-index")
-
     def get_index(self):
         return self.pc.Index(self.index_name)
 ```
@@ -213,6 +224,10 @@ pc index create -n agentic-quickstart-test -m cosine -c aws -r us-east-1 --model
 ```python
 from pinecone import Pinecone
 import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Initialize Pinecone client
 api_key = os.getenv("PINECONE_API_KEY")
@@ -648,6 +663,10 @@ pc index create -n agentic-quickstart-search -m cosine -c aws -r us-east-1 --mod
 ```python
 from pinecone import Pinecone
 import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Initialize Pinecone client
 pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
@@ -694,6 +713,10 @@ pc index create -n agentic-quickstart-rag -m cosine -c aws -r us-east-1 --model 
 ```python
 from pinecone import Pinecone
 import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Initialize Pinecone client
 pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
@@ -744,6 +767,10 @@ pc index create -n agentic-quickstart-recommendations -m cosine -c aws -r us-eas
 ```python
 from pinecone import Pinecone
 import os
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Initialize Pinecone client
 pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))

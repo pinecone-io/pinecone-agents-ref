@@ -38,15 +38,15 @@ pc target -o "my-org" -p "my-project"
 ### Option 2: API Key
 
 ```bash
-export PINECONE_API_KEY="your-api-key"
-# Or: pc auth configure --global-api-key <api-key>
+pc auth configure --api-key your-api-key
 ```
+
+**Note**: For application code, use `.env` files (see [PINECONE.md](./PINECONE.md#-environment-variables--security-best-practices)).
 
 ### Option 3: Service Account
 
 ```bash
-export PINECONE_CLIENT_ID="your-client-id"
-export PINECONE_CLIENT_SECRET="your-client-secret"
+pc auth configure --client-id your-client-id --client-secret your-client-secret
 ```
 
 **Full CLI reference:** [https://docs.pinecone.io/reference/cli/command-reference](https://docs.pinecone.io/reference/cli/command-reference)

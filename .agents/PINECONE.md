@@ -57,6 +57,10 @@ Based on what the user is asking, consult these guides:
 
 ## Universal Concepts (All Languages)
 
+### 🔐 Environment Variables & Security Best Practices
+
+**⚠️ MANDATORY: Always use `.env` files instead of `export` commands.** More secure, project-specific, and standard practice. See language-specific guides for implementation: [Python](./PINECONE-python.md#environment-configuration), [TypeScript](./PINECONE-typescript.md#environment-configuration), [Go](./PINECONE-go.md#environment-configuration), [Java](./PINECONE-java.md#environment-configuration).
+
 ### ⚠️ Critical: Installation & SDK
 
 > **Before installing anything**: ALWAYS verify if CLI/SDK is already installed before asking users to install or update:
@@ -229,16 +233,17 @@ Use for exact keyword matching with optional required terms and reranking.
 
 - ❌ Hardcoded keys
 - ✅ Use environment variables
+- ✅ **BEST PRACTICE**: Use `.env` files (or language-specific equivalents) instead of `export` commands
 
 ## Key Constraints
 
-| Constraint          | Limit                                      | Notes                             |
-| ------------------- | ------------------------------------------ | --------------------------------- |
-| Metadata per record | 40KB                                       | Flat JSON only, no nested objects |
-| Text batch size     | 96 records                                 | Also 2MB total per batch          |
-| Vector batch size   | 1000 records                               | Also 2MB total per batch          |
-| Query response size | 4MB                                        | Per query response                |
-| Metadata types      | strings, ints, floats, bools, string lists | No nested structures              |
+| Constraint          | Limit                                      | Notes                                                                      |
+| ------------------- | ------------------------------------------ | -------------------------------------------------------------------------- |
+| Metadata per record | 40KB                                       | Flat JSON only, no nested objects                                          |
+| Text batch size     | 96 records                                 | Also 2MB total per batch                                                   |
+| Vector batch size   | 1000 records                               | Also 2MB total per batch                                                   |
+| Query response size | 4MB                                        | Per query response                                                         |
+| Metadata types      | strings, ints, floats, bools, string lists | No nested structures                                                       |
 | Consistency         | Eventually consistent                      | Wait ~1-5s after upsert (include in generated code, not terminal commands) |
 
 ## Error Handling (Production)

@@ -176,33 +176,25 @@ implementation 'io.pinecone:pinecone-client:5.1.0'
 
 ### 3. Configure API Key
 
-```bash
-# Set your Pinecone API key
-export PINECONE_API_KEY="your-api-key-here"
+**⚠️ Use `.env` files (see [PINECONE.md](./PINECONE.md#-environment-variables--security-best-practices) for details).**
 
-# Authenticate CLI
-pc auth configure --api-key $PINECONE_API_KEY
+Create `.env` file:
+
+```bash
+PINECONE_API_KEY=your-api-key-here
+```
+
+**CLI authentication:**
+
+```bash
+pc auth configure --api-key your-api-key-here
 ```
 
 Get your API key from: [https://app.pinecone.io/](https://app.pinecone.io/)
 
 ### 4. Optional: LLM API Key (For RAG Quickstart Only)
 
-If building a RAG system, you'll need an LLM. Common options:
-
-```bash
-# OpenAI
-export OPENAI_API_KEY="your-openai-key-here"
-
-# Anthropic
-export ANTHROPIC_API_KEY="your-anthropic-key-here"
-
-# Groq
-export GROQ_API_KEY="your-groq-key-here"
-
-# Or use a local LLM (e.g., via Ollama)
-# No API key needed, just ensure Ollama is running locally
-```
+Add to `.env`: `OPENAI_API_KEY=...`, `ANTHROPIC_API_KEY=...`, or `GROQ_API_KEY=...`. Or use local LLM (Ollama) - no key needed.
 
 **Note**: Any LLM can be used, including local models. For local models, you may need to adapt the API calls in the examples.
 

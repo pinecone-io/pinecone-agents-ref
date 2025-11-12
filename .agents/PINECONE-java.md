@@ -88,42 +88,48 @@ import java.util.*;
 
 ### Environment Configuration
 
+**⚠️ Use `.env` files (see [PINECONE.md](./PINECONE.md#-environment-variables--security-best-practices)).**
+
+**Maven:**
+```xml
+<dependency>
+    <groupId>io.github.cdimascio</groupId>
+    <artifactId>dotenv-java</artifactId>
+    <version>3.0.0</version>
+</dependency>
+```
+
 ```java
+import io.github.cdimascio.dotenv.Dotenv;
 import io.pinecone.clients.Pinecone;
 
-public class PineconeConfig {
-    private static final String API_KEY = System.getenv("PINECONE_API_KEY");
-
-    public static Pinecone createClient() {
-        if (API_KEY == null || API_KEY.isEmpty()) {
-            throw new IllegalArgumentException("PINECONE_API_KEY environment variable not set");
-        }
-
-        return new Pinecone.Builder(API_KEY).build();
-    }
+Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
+String apiKey = dotenv.get("PINECONE_API_KEY");
+if (apiKey == null || apiKey.isEmpty()) {
+    throw new IllegalArgumentException("PINECONE_API_KEY required");
 }
+Pinecone client = new Pinecone.Builder(apiKey).build();
 ```
 
 ### Production Client Class
 
 ```java
+import io.github.cdimascio.dotenv.Dotenv;
 import io.pinecone.clients.Pinecone;
 import io.pinecone.clients.Index;
 
 public class PineconeService {
     private final Pinecone client;
     private final String indexName;
-
     public PineconeService() {
-        String apiKey = System.getenv("PINECONE_API_KEY");
+        Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
+        String apiKey = dotenv.get("PINECONE_API_KEY");
         if (apiKey == null || apiKey.isEmpty()) {
             throw new IllegalArgumentException("PINECONE_API_KEY required");
         }
-
         this.client = new Pinecone.Builder(apiKey).build();
-        this.indexName = System.getenv().getOrDefault("PINECONE_INDEX", "default-index");
+        this.indexName = dotenv.get("PINECONE_INDEX", "default-index");
     }
-
     public Index getIndex() {
         return client.getIndexConnection(indexName);
     }

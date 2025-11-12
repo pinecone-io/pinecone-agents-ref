@@ -78,36 +78,41 @@ import { Pinecone } from "@pinecone-database/pinecone";
 
 ### Environment Configuration
 
+**⚠️ Use `.env` files (see [PINECONE.md](./PINECONE.md#-environment-variables--security-best-practices)).**
+
+```bash
+npm install dotenv
+```
+
 ```typescript
+import { config } from "dotenv";
 import { Pinecone } from "@pinecone-database/pinecone";
 
-// Initialize Pinecone client
+config(); // Loads .env file
 const apiKey = process.env.PINECONE_API_KEY;
-if (!apiKey) {
-  throw new Error("PINECONE_API_KEY environment variable not set");
-}
-
+if (!apiKey) throw new Error("PINECONE_API_KEY required");
 const pc = new Pinecone({ apiKey });
 ```
+
+**Note**: Next.js auto-loads `.env` files - no `config()` needed.
 
 ### Production Client Class
 
 ```typescript
+import { config } from "dotenv";
 import { Pinecone } from "@pinecone-database/pinecone";
+
+config();
 
 class PineconeClient {
   private pc: Pinecone;
   private indexName: string;
-
   constructor() {
     const apiKey = process.env.PINECONE_API_KEY;
-    if (!apiKey) {
-      throw new Error("PINECONE_API_KEY required");
-    }
+    if (!apiKey) throw new Error("PINECONE_API_KEY required");
     this.pc = new Pinecone({ apiKey });
     this.indexName = process.env.PINECONE_INDEX || "default-index";
   }
-
   getIndex() {
     return this.pc.index(this.indexName);
   }
@@ -189,7 +194,11 @@ pc index create -n agentic-quickstart-test -m cosine -c aws -r us-east-1 --model
 > **Sample Data**: Use the sample data from [PINECONE-quickstart.md](./PINECONE-quickstart.md#sample-data-use-in-all-languages). Convert JSON format to TypeScript objects.
 
 ```typescript
+import { config } from "dotenv";
 import { Pinecone } from "@pinecone-database/pinecone";
+
+// Load environment variables from .env file
+config();
 
 // Initialize Pinecone client
 const apiKey = process.env.PINECONE_API_KEY;
@@ -203,7 +212,8 @@ const pc = new Pinecone({ apiKey });
 const records = [
   {
     _id: "rec1",
-    content: "The Eiffel Tower was completed in 1889 and stands in Paris, France.",
+    content:
+      "The Eiffel Tower was completed in 1889 and stands in Paris, France.",
     category: "history",
   },
   {
@@ -731,7 +741,11 @@ pc index create -n agentic-quickstart-search -m cosine -c aws -r us-east-1 --mod
 **Implementation:**
 
 ```typescript
+import { config } from "dotenv";
 import { Pinecone } from "@pinecone-database/pinecone";
+
+// Load environment variables from .env file
+config();
 
 // Initialize Pinecone client
 const pc = new Pinecone({ apiKey: process.env.PINECONE_API_KEY });
@@ -778,7 +792,11 @@ pc index create -n agentic-quickstart-rag -m cosine -c aws -r us-east-1 --model 
 **Implementation:**
 
 ```typescript
+import { config } from "dotenv";
 import { Pinecone } from "@pinecone-database/pinecone";
+
+// Load environment variables from .env file
+config();
 
 // Initialize Pinecone client
 const pc = new Pinecone({ apiKey: process.env.PINECONE_API_KEY });
@@ -831,7 +849,11 @@ pc index create -n agentic-quickstart-recommendations -m cosine -c aws -r us-eas
 **Implementation:**
 
 ```typescript
+import { config } from "dotenv";
 import { Pinecone } from "@pinecone-database/pinecone";
+
+// Load environment variables from .env file
+config();
 
 // Initialize Pinecone client
 const pc = new Pinecone({ apiKey: process.env.PINECONE_API_KEY });
@@ -972,6 +994,7 @@ console.log(results);
 > **For complete information on eventual consistency**, see [PINECONE-troubleshooting.md](./PINECONE-troubleshooting.md#indexing-delays--eventual-consistency).
 
 **Key Points:**
+
 - Records become searchable 5-10 seconds after upsert
 - Stats update 10-20 seconds after upsert
 - Always wait 10+ seconds before searching after upserting (include wait logic in generated code)

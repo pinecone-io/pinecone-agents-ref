@@ -76,31 +76,27 @@ import (
 
 ### Environment Configuration
 
+**⚠️ Use `.env` files (see [PINECONE.md](./PINECONE.md#-environment-variables--security-best-practices)).**
+
+```bash
+go get github.com/joho/godotenv
+```
+
 ```go
 import (
-    "context"
     "fmt"
+    "log"
     "os"
-
+    "github.com/joho/godotenv"
     "github.com/pinecone-io/go-pinecone/pinecone"
 )
 
-func createClient() (*pinecone.Client, error) {
-    apiKey := os.Getenv("PINECONE_API_KEY")
-    if apiKey == "" {
-        return nil, fmt.Errorf("PINECONE_API_KEY environment variable not set")
-    }
-
-    client, err := pinecone.NewClient(pinecone.NewClientParams{
-        ApiKey: apiKey,
-    })
-
-    if err != nil {
-        return nil, fmt.Errorf("failed to create Pinecone client: %w", err)
-    }
-
-    return client, nil
+godotenv.Load()  // Loads .env file
+apiKey := os.Getenv("PINECONE_API_KEY")
+if apiKey == "" {
+    return nil, fmt.Errorf("PINECONE_API_KEY required")
 }
+client, err := pinecone.NewClient(pinecone.NewClientParams{ApiKey: apiKey})
 ```
 
 ### Production Client Struct
@@ -109,8 +105,9 @@ func createClient() (*pinecone.Client, error) {
 import (
     "context"
     "fmt"
+    "log"
     "os"
-
+    "github.com/joho/godotenv"
     "github.com/pinecone-io/go-pinecone/pinecone"
 )
 
@@ -120,28 +117,20 @@ type PineconeService struct {
 }
 
 func NewPineconeService() (*PineconeService, error) {
+    godotenv.Load()
     apiKey := os.Getenv("PINECONE_API_KEY")
     if apiKey == "" {
         return nil, fmt.Errorf("PINECONE_API_KEY required")
     }
-
-    client, err := pinecone.NewClient(pinecone.NewClientParams{
-        ApiKey: apiKey,
-    })
-
+    client, err := pinecone.NewClient(pinecone.NewClientParams{ApiKey: apiKey})
     if err != nil {
-        return nil, fmt.Errorf("failed to create Pinecone client: %w", err)
+        return nil, fmt.Errorf("failed to create client: %w", err)
     }
-
     indexName := os.Getenv("PINECONE_INDEX")
     if indexName == "" {
         indexName = "default-index"
     }
-
-    return &PineconeService{
-        client:    client,
-        indexName: indexName,
-    }, nil
+    return &PineconeService{client: client, indexName: indexName}, nil
 }
 
 func (ps *PineconeService) GetIndexConnection() (*pinecone.IndexConnection, error) {
