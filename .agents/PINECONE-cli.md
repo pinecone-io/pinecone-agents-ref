@@ -180,14 +180,22 @@ pc index create -n my-app-prod -m cosine -c aws -r us-east-1 \
 
 ## CLI Troubleshooting
 
+> **⚠️ For agents**: If a CLI command is not recognized or returns an "Unknown command" error:
+>
+> 1. First check the CLI version with `pc version`
+> 2. Compare with the latest version from [GitHub Releases](https://github.com/pinecone-io/cli/releases)
+> 3. If outdated, ask the user to update: `brew update && brew upgrade pinecone` (macOS) or download the latest release
+> 4. Verify the command syntax matches the current CLI version documentation
+
 ### Common Issues
 
-| Issue                   | Solution                                                                         |
-| ----------------------- | -------------------------------------------------------------------------------- |
-| `pc: command not found` | Install CLI: `brew tap pinecone-io/tap && brew install pinecone-io/tap/pinecone` |
-| `Authentication failed` | Run `pc auth login` or set an API key or service account                         |
-| `Index already exists`  | Use different name or delete existing: `pc index delete --name <name>`           |
-| `Permission denied`     | Check API key permissions or organization access                                 |
+| Issue                                     | Solution                                                                                                                                                                                        |
+| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pc: command not found`                   | Install CLI: `brew tap pinecone-io/tap && brew install pinecone-io/tap/pinecone`                                                                                                                |
+| `Unknown command` or unrecognized command | Check CLI version with `pc version`. If outdated, update: `brew update && brew upgrade pinecone` (macOS) or download latest from [GitHub Releases](https://github.com/pinecone-io/cli/releases) |
+| `Authentication failed`                   | Run `pc auth login` or set an API key or service account                                                                                                                                        |
+| `Index already exists`                    | Use different name or delete existing: `pc index delete --name <name>`                                                                                                                          |
+| `Permission denied`                       | Check API key permissions or organization access                                                                                                                                                |
 
 ### Verification Commands
 
