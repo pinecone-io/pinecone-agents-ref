@@ -26,14 +26,31 @@ Download from [GitHub Releases](https://github.com/pinecone-io/cli/releases) (Li
 
 ## Authentication
 
+> **⚠️ Before configuring authentication**: ALWAYS check if the CLI is already authenticated by running `pc auth status`. Only prompt for authentication setup if the command fails or shows `UNSET` values.
+>
+> **⚠️ After verifying authentication**: If CLI is authenticated, check the target organization and project by running `pc target --show`. Ask the user to confirm this is where indexes should be created before proceeding with index creation. If those are missing ask the user to Double check the configured key belongs to the correct organization and project. If user wants to change the target, use `pc target -o "org-name" -p "project-name"` to help them set it.
+
 Choose one method:
 
 ### Option 1: User Login (Recommended for Development)
 
 ```bash
-pc login
-pc target -o "my-org" -p "my-project"
+pc auth login
 ```
+
+**⚠️ Important for agents**: This command prints a login URL and prompts the user to press Enter to open the browser. **This requires an interactive terminal with browser access**.
+
+**If running in a non-interactive environment** (headless server, CI/CD, remote terminal, or agent environment without browser access):
+
+- **Do NOT use `pc auth login`** - it will not work
+- **Use Option 2 (API Key)** or **Option 3 (Service Account)** instead
+- These methods work in all environments and are better suited for automation
+
+**When to use each method:**
+
+- **User Login (`pc auth login`)**: Only use if you can confirm the user has an interactive terminal with browser access
+- **API Key**: Use for most automated scenarios, CI/CD, or when browser access is unavailable
+- **Service Account**: Use for production automation and service-to-service authentication
 
 ### Option 2: API Key
 
@@ -110,18 +127,24 @@ pc api-key delete --key-id <key-id>
 ### Development Setup
 
 ```bash
-# 1. Install CLI
+# 1. Install CLI (check first: pc version)
 brew tap pinecone-io/tap && brew install pinecone-io/tap/pinecone
 
-# 2. Authenticate
-pc login
+# 2. Check authentication status (check first: pc auth status)
+# For interactive environments with browser access:
+pc auth login
+# OR for non-interactive/automated environments:
+pc auth configure --api-key your-api-key
+
+# 3. Verify target (if already authenticated) and set it if needed
+pc target --show
 pc target -o "my-org" -p "my-project"
 
-# 3. Create index
+# 4. Create index
 pc index create -n my-dev-index -m cosine -c aws -r us-east-1 \
   --model llama-text-embed-v2 --field_map text=content
 
-# 4. Verify setup
+# 5. Verify setup
 pc index list
 pc index describe --name my-dev-index
 ```
@@ -162,7 +185,7 @@ pc index create -n my-app-prod -m cosine -c aws -r us-east-1 \
 | Issue                   | Solution                                                                         |
 | ----------------------- | -------------------------------------------------------------------------------- |
 | `pc: command not found` | Install CLI: `brew tap pinecone-io/tap && brew install pinecone-io/tap/pinecone` |
-| `Authentication failed` | Run `pc login` or set `PINECONE_API_KEY` environment variable                    |
+| `Authentication failed` | Run `pc auth login` or set an API key or service account                         |
 | `Index already exists`  | Use different name or delete existing: `pc index delete --name <name>`           |
 | `Permission denied`     | Check API key permissions or organization access                                 |
 
@@ -172,14 +195,18 @@ pc index create -n my-app-prod -m cosine -c aws -r us-east-1 \
 # Check CLI version
 pc version
 
-# Verify authentication
+# Check authentication status and method
+pc auth status
+
+# Check target organization and project
+pc target --show
+
+# Verify authentication (test with API call)
 pc index list
 
 # Check index status
 pc index describe --name my-index
 
-# View index stats
-pc index stats --name my-index
 ```
 
 ## CLI vs SDK Decision Matrix

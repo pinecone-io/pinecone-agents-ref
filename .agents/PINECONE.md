@@ -69,6 +69,10 @@ Based on what the user is asking, consult these guides:
 > - **SDK**: Check package files or use language-specific verification commands
 > - Only prompt for installation when verification shows it's missing
 
+### ⚠️ Critical: CLI Authentication (When Using CLI)
+
+> **When using CLI for index creation or management**: ALWAYS check if the CLI is already authenticated by running `pc auth status` before prompting for authentication setup. See [PINECONE-cli.md](./PINECONE-cli.md#authentication) for details on interpreting the output.
+
 ### ⚠️ MANDATORY: Always Use Latest Version
 
 **REQUIREMENT**: When creating new projects or adding Pinecone dependencies, you MUST:
