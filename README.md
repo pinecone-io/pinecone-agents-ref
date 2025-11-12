@@ -1,72 +1,16 @@
 # Pinecone Agent Reference
 
-This repository contains specialized agent instructions for the Pinecone vector database, designed to be integrated into your AI coding assistant's configuration file.
+Specialized agent instructions for the Pinecone vector database, designed to enhance your AI coding assistant's understanding of Pinecone.
 
-[AGENTS.md](https://agents.md/) is an open format used by over 20k open-source projects and is supported by most coding assistants including Cursor, Aider, GitHub Copilot, and many others.
-
-## What's Included
-
-This repository provides comprehensive Pinecone documentation organized into the `.agents/` folder:
-
-- **PINECONE.md** - Universal concepts, CLI vs SDK guidance, common patterns, and navigation guide
-- **PINECONE-quickstart.md** - Step-by-step tutorials (Quick Test, Search, RAG, Recommendations)
-- **PINECONE-cli.md** - CLI installation, authentication, and command reference
-- **PINECONE-python.md** - Python SDK guide with code examples
-- **PINECONE-typescript.md** - TypeScript/Node.js SDK guide with code examples
-- **PINECONE-go.md** - Go SDK guide with code examples
-- **PINECONE-java.md** - Java SDK guide with code examples
-- **PINECONE-troubleshooting.md** - Common issues, solutions, and debugging tips
-
-## How It Works
-
-This project leverages the [AGENTS.md format](https://agents.md/) to enhance your AI coding assistant's understanding of Pinecone. Here's how the integration works:
-
-### The AGENTS.md Format
-
-`AGENTS.md` (or `CLAUDE.md` for Claude Code) is a configuration file that lives in your project root and contains directives for your AI coding assistant. When you add a section about Pinecone, you're telling your assistant: "When users ask about Pinecone, follow these special instructions."
-
-### The Integration Flow
-
-1. **Installation**: When you download and extract a release, two key components are added to your project:
-
-   - **`.agents/` folder**: Contains comprehensive Pinecone documentation files organized by topic and language
-   - **Configuration snippet**: A directive added to your `AGENTS.md` that instructs the assistant to read from the `.agents/` folder
-
-2. **The Instruction Directive**: The snippet you add to `AGENTS.md` contains a mandatory instruction that says:
-
-   > "If you need to help with Pinecone, you MUST read `.agents/PINECONE.md` first"
-
-3. **How Assistants Use It**: When a user asks about Pinecone:
-
-   - The assistant reads your `AGENTS.md` file
-   - It sees the Pinecone directive and knows to consult `.agents/PINECONE.md` first
-   - The main guide helps the assistant navigate to the appropriate language-specific or topic-specific documentation
-   - The assistant provides accurate, context-aware answers based on the comprehensive documentation
-
-4. **Benefits**: This approach ensures:
-   - **Consistency**: All assistants have access to the same, up-to-date Pinecone documentation
-   - **Accuracy**: Language-specific guides prevent common mistakes (like using deprecated SDKs)
-   - **Completeness**: The documentation covers CLI vs SDK usage, common patterns, troubleshooting, and more
-   - **Maintainability**: Updates to the Pinecone reference automatically improve assistant responses
-
-### Why This Approach?
-
-Instead of relying on general knowledge or web searches, your assistant has access to curated, project-specific documentation that includes:
-
-- Current best practices and patterns
-- Language-specific implementations
-- Common pitfalls and how to avoid them
-- Troubleshooting guides for typical issues
-
-This makes your assistant more reliable and knowledgeable about Pinecone than it would be with general training data alone.
+This project uses the [AGENTS.md format](https://agents.md/)—an open format used by over 20k open-source projects and supported by most coding assistants including Cursor, Aider, GitHub Copilot, and many others.
 
 ## Quick Start
 
-The general process is to download the latest release, extract the archive, and add the Pinecone section to your assistant's configuration file.
+Download the latest release and run the installation command for your assistant:
 
 ### Most Assistants (Cursor, Aider, GitHub Copilot, etc.)
 
-**Linux/macOS (Bash/Zsh):**
+**Linux/macOS:**
 
 ```bash
 curl -L -o agents.zip https://github.com/pinecone-io/pinecone-agents-ref/releases/latest/download/agents.zip
@@ -87,9 +31,9 @@ Remove-Item AGENTS-pinecone-snippet.md
 
 ### Claude Code
 
-Claude Code uses `CLAUDE.md` instead of `AGENTS.md`.
+Uses `CLAUDE.md` instead of `AGENTS.md`.
 
-**Linux/macOS (Bash/Zsh):**
+**Linux/macOS:**
 
 ```bash
 curl -L -o agents.zip https://github.com/pinecone-io/pinecone-agents-ref/releases/latest/download/agents.zip
@@ -110,9 +54,9 @@ Remove-Item AGENTS-pinecone-snippet.md
 
 ### Gemini CLI
 
-Gemini CLI uses `GEMINI.md` context files instead of `AGENTS.md`. These files are loaded hierarchically from your project root and provide instructions to the AI assistant.
+Uses `GEMINI.md` context files instead of `AGENTS.md`.
 
-**Linux/macOS (Bash/Zsh):**
+**Linux/macOS:**
 
 ```bash
 curl -L -o agents.zip https://github.com/pinecone-io/pinecone-agents-ref/releases/latest/download/agents.zip
@@ -131,56 +75,64 @@ Add-Content -Path GEMINI.md -Value (Get-Content AGENTS-pinecone-snippet.md)
 Remove-Item AGENTS-pinecone-snippet.md
 ```
 
-**Note:** Gemini CLI automatically loads `GEMINI.md` files from your project root. The context file contains instructions that tell the AI to read the `.agents/PINECONE.md` file when needed. You can also place context files in subdirectories for more specific instructions. Use `/memory refresh` in Gemini CLI to reload context files if needed.
+**Note:** After installation, use `/memory refresh` in Gemini CLI to reload context files.
 
-That's it! Your project now has the `.agents/` folder with all Pinecone documentation and your configuration file has been updated.
+### After Installation
 
-### Important: Allow Re-indexing
+1. **Wait for re-indexing**: Most assistants need a few moments to recognize the new `.agents/` folder and configuration file.
+2. **Verify installation**: You should now have:
+   ```
+   your-project/
+   ├── .agents/
+   │   ├── PINECONE.md
+   │   ├── PINECONE-quickstart.md
+   │   ├── PINECONE-cli.md
+   │   ├── PINECONE-python.md
+   │   ├── PINECONE-typescript.md
+   │   ├── PINECONE-go.md
+   │   ├── PINECONE-java.md
+   │   └── PINECONE-troubleshooting.md
+   └── AGENTS.md (or CLAUDE.md or GEMINI.md)
+   ```
 
-Many coding assistants need to re-index your codebase to recognize the new `.agents/` folder and configuration file. Before using Pinecone-related features, either:
+## What's Included
 
-- **Wait a few moments** for automatic re-indexing to complete, or
-- **Manually trigger a re-index** (if your assistant provides this option)
+Comprehensive Pinecone documentation organized in the `.agents/` folder:
 
-**For Gemini CLI users:** After installation, use the `/memory refresh` command to reload context files. This ensures the CLI picks up your new `GEMINI.md` file and the `.agents/` folder.
+- **PINECONE.md** - Universal concepts, CLI vs SDK guidance, common patterns, and navigation guide
+- **PINECONE-quickstart.md** - Step-by-step tutorials (Quick Test, Search, RAG, Recommendations)
+- **PINECONE-cli.md** - CLI installation, authentication, and command reference
+- **PINECONE-python.md** - Python SDK guide with code examples
+- **PINECONE-typescript.md** - TypeScript/Node.js SDK guide with code examples
+- **PINECONE-go.md** - Go SDK guide with code examples
+- **PINECONE-java.md** - Java SDK guide with code examples
+- **PINECONE-troubleshooting.md** - Common issues, solutions, and debugging tips
 
-If you start using Pinecone features immediately after installation, your assistant may not yet have access to the Pinecone documentation. Once re-indexing is complete (or after running `/memory refresh` in Gemini CLI), your assistant will automatically reference the `.agents/PINECONE.md` files when you ask questions about Pinecone.
+## How It Works
 
-### Verify Installation
+When you install this reference, two things are added to your project:
 
-After running the commands above, you should have:
+1. **`.agents/` folder** - Contains comprehensive Pinecone documentation files
+2. **Configuration snippet** - Added to your `AGENTS.md` (or `CLAUDE.md`/`GEMINI.md`) that instructs your assistant to read from the `.agents/` folder
 
-```
-your-project/
-├── .agents/                         # Agent documentation folder
-│   ├── PINECONE.md                  # Main universal guide
-│   ├── PINECONE-quickstart.md       # Quickstart tutorials
-│   ├── PINECONE-cli.md              # CLI documentation
-│   ├── PINECONE-python.md           # Python SDK guide
-│   ├── PINECONE-typescript.md       # TypeScript/Node.js SDK guide
-│   ├── PINECONE-go.md               # Go SDK guide
-│   ├── PINECONE-java.md             # Java SDK guide
-│   └── PINECONE-troubleshooting.md  # Troubleshooting guide
-└── AGENTS.md                        # Your project's agent guide (with Pinecone section)
-    # or CLAUDE.md for Claude Code
-    # or GEMINI.md for Gemini CLI
+When users ask about Pinecone, your assistant will:
 
-```
+- Read the configuration file and see the Pinecone directive
+- Consult `.agents/PINECONE.md` first
+- Navigate to language-specific or topic-specific documentation as needed
+- Provide accurate, context-aware answers based on the comprehensive documentation
 
-### Customizing the Integration
+This ensures your assistant has access to curated, up-to-date Pinecone documentation including current best practices, language-specific implementations, common pitfalls, and troubleshooting guides.
 
-The installation commands append the appropriate snippet file to your configuration file. If you already have a configuration file and want more control over where the Pinecone section is placed:
+## Usage
 
-1. Extract the archive: `unzip agents.zip && rm agents.zip`
-2. Open `AGENTS-pinecone-snippet.md` and copy the "Pinecone (Vector Database)" section
-3. Manually add it to your configuration file (`AGENTS.md`, `CLAUDE.md`, or `GEMINI.md`) where you prefer
-4. Remove the snippet file
+Once installed and re-indexed, your AI coding assistant will automatically reference the `.agents/PINECONE.md` files when users ask questions about Pinecone. The main guide provides navigation to language-specific documentation based on the user's needs.
 
 ## Updating
 
-To update to a newer version, simply download the latest release and extract the archive. Your configuration file (`AGENTS.md`, `CLAUDE.md`, or `GEMINI.md`) typically doesn't need changes unless the structure changes.
+To update to a newer version:
 
-**Linux/macOS (Bash/Zsh):**
+**Linux/macOS:**
 
 ```bash
 curl -L -o agents.zip https://github.com/pinecone-io/pinecone-agents-ref/releases/latest/download/agents.zip
@@ -196,66 +148,63 @@ Expand-Archive -Path agents.zip -DestinationPath . -Force
 Remove-Item agents.zip
 ```
 
-## Usage
+Your configuration file (`AGENTS.md`, `CLAUDE.md`, or `GEMINI.md`) typically doesn't need changes unless the structure changes.
 
-Once installed, your AI coding assistant will automatically reference the `.agents/PINECONE.md` files when users ask questions about Pinecone. The main guide provides navigation to language-specific documentation based on the user's needs.
+## Customizing Installation
 
-## For Maintainers: Creating Releases
+If you already have a configuration file and want more control over where the Pinecone section is placed:
+
+1. Extract the archive: `unzip agents.zip && rm agents.zip`
+2. Open `AGENTS-pinecone-snippet.md` and copy the "Pinecone (Vector Database)" section
+3. Manually add it to your configuration file (`AGENTS.md`, `CLAUDE.md`, or `GEMINI.md`) where you prefer
+4. Remove the snippet file
+
+---
+
+## For Maintainers
+
+### Creating Releases
 
 The included GitHub Actions workflow (`.github/workflows/release.yml`) automatically packages and creates releases when you push a version tag.
 
-### How to Create a Release
-
-Simply tag and push your code:
+**To create a release:**
 
 ```bash
 git tag v1.0.0
 git push origin v1.0.0
 ```
 
-The workflow will automatically:
+The workflow will:
 
-1. Detect the version tag (matches `v*` pattern, e.g., `v1.0.0`, `v2.1.3`)
-2. Create a GitHub release if one doesn't already exist for that tag
-3. Package all files from the `.agents/` folder
-4. Include the `AGENTS-pinecone-snippet.md` file for easy integration
-5. Create both `agents.zip` and `agents.tar.gz` archives
-6. Attach both archives to the release as downloadable assets
+1. Detect the version tag (matches `v*` pattern)
+2. Create a GitHub release if one doesn't already exist
+3. Package all files from the `.agents/` folder and `AGENTS-pinecone-snippet.md`
+4. Create both `agents.zip` and `agents.tar.gz` archives
+5. Attach both archives to the release
 
-### How It Works
+**Archive structure:**
 
-The workflow triggers automatically on tag push (`push: tags: v*`) and:
+```
+archive/
+├── .agents/
+│   ├── PINECONE.md
+│   ├── PINECONE-quickstart.md
+│   ├── PINECONE-cli.md
+│   ├── PINECONE-python.md
+│   ├── PINECONE-typescript.md
+│   ├── PINECONE-go.md
+│   ├── PINECONE-java.md
+│   └── PINECONE-troubleshooting.md
+└── AGENTS-pinecone-snippet.md
+```
 
-1. Extracts the tag name (e.g., `v1.0.0`)
-2. Checks if a GitHub release already exists for that tag
-   - If a release exists → uses that release and attaches assets
-   - If no release exists → creates a new release automatically
-3. Packages the following files:
-   - All files from `.agents/` folder (8 Pinecone documentation files)
-   - `AGENTS-pinecone-snippet.md` file (works for all assistants including Gemini CLI)
-4. Creates archives with the structure:
-   ```
-   archive/
-   ├── .agents/
-   │   ├── PINECONE.md
-   │   ├── PINECONE-quickstart.md
-   │   ├── PINECONE-cli.md
-   │   ├── PINECONE-python.md
-   │   ├── PINECONE-typescript.md
-   │   ├── PINECONE-go.md
-   │   ├── PINECONE-java.md
-   │   └── PINECONE-troubleshooting.md
-   └── AGENTS-pinecone-snippet.md
-   ```
-5. Uploads both `agents.zip` and `agents.tar.gz` to the release
+You can also create releases manually through the GitHub UI. If a release exists for a tag but doesn't have assets yet, you can manually trigger the workflow or push the tag again.
 
-### Manual Release Option
-
-You can still create releases manually through the GitHub UI if you prefer. If you create a release for a tag that doesn't have assets yet, you can manually trigger the workflow or just push the tag again to have it run automatically.
+---
 
 ## Contributing
 
-Issues and pull requests are welcome! Please see the repository's contribution guidelines (if available).
+Issues and pull requests are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines and instructions.
 
 ## License
 
