@@ -34,6 +34,8 @@ Choose one method:
 
 ### Option 1: User Login (Recommended for Development)
 
+Only use if you can confirm the user has an interactive terminal with browser access
+
 ```bash
 pc auth login
 ```
@@ -46,13 +48,9 @@ pc auth login
 - **Use Option 2 (API Key)** or **Option 3 (Service Account)** instead
 - These methods work in all environments and are better suited for automation
 
-**When to use each method:**
-
-- **User Login (`pc auth login`)**: Only use if you can confirm the user has an interactive terminal with browser access
-- **API Key**: Use for most automated scenarios, CI/CD, or when browser access is unavailable
-- **Service Account**: Use for production automation and service-to-service authentication
-
 ### Option 2: API Key
+
+Use for most automated scenarios, CI/CD, or when browser access is unavailable. Scoped to a specific project.
 
 ```bash
 pc auth configure --api-key your-api-key
@@ -62,11 +60,18 @@ pc auth configure --api-key your-api-key
 
 ### Option 3: Service Account
 
+Use when you need access to multiple projects within an organization. Scoped at the organization level (see details below).
+
 ```bash
 pc auth configure --client-id your-client-id --client-secret your-client-secret
 ```
 
-**Full CLI reference:** [https://docs.pinecone.io/reference/cli/command-reference](https://docs.pinecone.io/reference/cli/command-reference)
+**Key difference from API Key**: Service accounts are scoped at the **organization level** (not project level), providing access to **all projects within the organization**. This makes them ideal for:
+
+- Managing multiple projects across an organization
+- Cross-project automation and deployment pipelines
+- Service-to-service authentication where access to multiple projects is needed
+- Centralized authentication for organization-wide operations
 
 ## Index Management
 
@@ -189,13 +194,13 @@ pc index create -n my-app-prod -m cosine -c aws -r us-east-1 \
 
 ### Common Issues
 
-| Issue                                     | Solution                                                                                                                                                                                        |
-| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pc: command not found`                   | Install CLI: `brew tap pinecone-io/tap && brew install pinecone-io/tap/pinecone`                                                                                                                |
-| `Unknown command` or unrecognized command | Check CLI version with `pc version`. If outdated, update: `brew update && brew upgrade pinecone` (macOS) or download latest from [GitHub Releases](https://github.com/pinecone-io/cli/releases) |
-| `Authentication failed`                   | Run `pc auth login` or set an API key or service account                                                                                                                                        |
-| `Index already exists`                    | Use different name or delete existing: `pc index delete --name <name>`                                                                                                                          |
-| `Permission denied`                       | Check API key permissions or organization access                                                                                                                                                |
+| Issue                                     | Solution                                                                         |
+| ----------------------------------------- | -------------------------------------------------------------------------------- |
+| `pc: command not found`                   | Install CLI: `brew tap pinecone-io/tap && brew install pinecone-io/tap/pinecone` |
+| `Unknown command` or unrecognized command | See troubleshooting steps above (check version, update if needed)                |
+| `Authentication failed`                   | Run `pc auth login` or set an API key or service account                         |
+| `Index already exists`                    | Use different name or delete existing: `pc index delete --name <name>`           |
+| `Permission denied`                       | Check API key permissions or organization access                                 |
 
 ### Verification Commands
 
