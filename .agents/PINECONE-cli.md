@@ -260,8 +260,6 @@ RUN chmod +x /scripts/deploy-index.sh
 
 ## Advanced Usage
 
-### Batch Operations
-
 ```bash
 # Create multiple indexes
 for env in dev staging prod; do
@@ -270,18 +268,30 @@ for env in dev staging prod; do
 done
 ```
 
-### Index Migration
+```bash
+# Delete multiple indexes by pattern (e.g., test indexes)
+pc index list | grep "^test-" | awk '{print $1}' | xargs -I {} pc index delete --name {}
+```
 
 ```bash
-# Export index configuration
-pc index describe --name old-index > old-index-config.json
+# Export configurations for documentation
+pc index list | awk '{print $1}' | while read index; do
+  pc index describe --json --name "$index" > "${index}-config.json"
+done
+```
 
-# Create new index with same configuration
-pc index create -n new-index -m cosine -c aws -r us-east-1 \
-  --model llama-text-embed-v2 --field_map text=content
+```bash
+# Check the status of all indexes in a project
+pc index list | awk '{print $1}' | while read index; do
+  pc index describe --json --name "$index" | jq -r '"\(.name): \(.status.ready)"';
+done
+```
 
-# Delete old index after migration
-pc index delete --name old-index
+```bash
+# Configure multiple indexes at once
+for index in prod-index staging-index; do
+  pc index configure --name "$index" --deletion_protection "enabled"
+done
 ```
 
 ## Resources
