@@ -1,6 +1,6 @@
 # Pinecone TypeScript/Node.js SDK Guide
 
-> **Prerequisites**: See [AGENTS.md](../AGENTS.md) for universal concepts and setup.
+> **Prerequisites**: See [PINECONE.md](./PINECONE.md) for universal concepts and setup.
 
 This guide provides TypeScript/Node.js-specific patterns, examples, and best practices for the Pinecone SDK.
 

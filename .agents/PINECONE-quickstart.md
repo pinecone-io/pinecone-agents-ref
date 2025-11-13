@@ -1,6 +1,6 @@
 # Pinecone Quickstart Guide
 
-> **Prerequisites**: See [AGENTS.md](../AGENTS.md) for universal concepts and setup.
+> **Prerequisites**: See [PINECONE.md](./PINECONE.md) for universal concepts and setup.
 
 > **Important for all quickstarts**: Execute all steps completely. Keep setup minimal (directories, virtual environments, dependencies only). Do not expect the user to satisfy any prerequisites except providing API keys. For summaries, use only README.md and SUMMARY.md.
 
@@ -458,7 +458,7 @@ See [PINECONE-cli.md](./PINECONE-cli.md) for complete CLI reference.
 
 After completing a quickstart:
 
-1. **Explore advanced features**: [AGENTS.md](../AGENTS.md#official-documentation-resources)
+1. **Explore advanced features**: [PINECONE.md](./PINECONE.md#official-documentation-resources)
 2. **Learn data operations**: See language-specific sections on upsert, fetch, delete
 3. **Master search patterns**: Understand filtering, reranking, hybrid search
 4. **Production best practices**: Error handling, retry logic, monitoring

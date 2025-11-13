@@ -1,6 +1,6 @@
 # Pinecone CLI Guide
 
-> **Prerequisites**: See [AGENTS.md](../AGENTS.md) for universal concepts and CLI vs SDK guidance.
+> **Prerequisites**: See [PINECONE.md](./PINECONE.md) for universal concepts and CLI vs SDK guidance.
 >
 > **Getting Started?** See [Quickstart Guide](./PINECONE-quickstart.md) for step-by-step tutorials.
 
