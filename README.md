@@ -13,6 +13,12 @@ Download the latest release and run the installation command for your assistant:
 **Linux/macOS:**
 
 ```bash
+curl -sS https://raw.githubusercontent.com/pinecone-io/pinecone-agents-ref/main/install.sh | sh
+```
+
+Alternatively, run the commands directly:
+
+```bash
 curl -L -o agents.zip https://github.com/pinecone-io/pinecone-agents-ref/releases/latest/download/agents.zip
 unzip agents.zip && rm agents.zip
 touch AGENTS.md && cat AGENTS-pinecone-snippet.md >> AGENTS.md && rm AGENTS-pinecone-snippet.md
