@@ -13,7 +13,7 @@ Download the latest release and run the installation command for your assistant:
 **Linux/macOS:**
 
 ```bash
-curl -sS https://raw.githubusercontent.com/pinecone-io/pinecone-agents-ref/main/install.sh | sh
+curl -sSL https://docs.pinecone.io/install-agent-reference | sh
 ```
 
 Alternatively, run the commands directly:
