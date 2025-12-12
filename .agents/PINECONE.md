@@ -71,7 +71,11 @@ Based on what the user is asking, consult these guides:
 
 ### ⚠️ Critical: CLI Authentication (When Using CLI)
 
-> **When using CLI for index creation or management**: ALWAYS check if the CLI is already authenticated by running `pc auth status` before prompting for authentication setup. See [PINECONE-cli.md](./PINECONE-cli.md#authentication) for details on interpreting the output.
+> **When using CLI for index creation or management**:
+>
+> **For quickstarts:** Create a `.env` file with `PINECONE_API_KEY` and run `source .env`. The CLI automatically detects the environment variable - no separate authentication needed.
+>
+> **For persistent authentication:** Run `pc auth status` to check if already authenticated. See [PINECONE-cli.md](./PINECONE-cli.md#authentication) for `pc auth configure` and other options.
 
 ### ⚠️ MANDATORY: Always Use Latest Version
 

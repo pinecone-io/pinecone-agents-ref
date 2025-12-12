@@ -211,10 +211,26 @@ class PineconeClient:
 
 Complete setup prerequisites first, then:
 
+**Before running commands, ensure environment is ready:**
+
+```bash
+# Load API key into environment (CLI will use this)
+source .env
+
+# Export for CLI use (required for quickstart)
+export PINECONE_API_KEY
+
+# Activate virtual environment
+source venv/bin/activate
+```
+
 1. **Create index with CLI:**
 
 ```bash
 pc index create -n agentic-quickstart-test -m cosine -c aws -r us-east-1 --model llama-text-embed-v2 --field_map text=content
+
+# Wait for index to be ready
+sleep 5
 ```
 
 2. **Upsert sample data:**
