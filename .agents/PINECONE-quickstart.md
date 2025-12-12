@@ -178,13 +178,37 @@ implementation 'io.pinecone:pinecone-client:5.1.0'
 
 **⚠️ Use `.env` files (see [PINECONE.md](./PINECONE.md#-environment-variables--security-best-practices) for details).**
 
-Create `.env` file:
+**Recommended Workflow (CLI + SDK):**
+
+1. **Create `.env` file** in your project root:
 
 ```bash
 PINECONE_API_KEY=your-api-key-here
 ```
 
-**CLI authentication:**
+2. **Load into your shell:**
+
+```bash
+source .env
+```
+
+3. **Export for CLI use** (required for quickstart):
+
+```bash
+export PINECONE_API_KEY
+```
+
+4. **Activate virtual environment** (if using Python):
+
+```bash
+source venv/bin/activate
+```
+
+Now both CLI commands (`pc index create ...`) and Python scripts (using `python-dotenv`) will use the same API key.
+
+**Alternative: Persistent CLI Authentication**
+
+If you prefer CLI authentication that persists across shell sessions:
 
 ```bash
 pc auth configure --api-key your-api-key-here
@@ -207,10 +231,11 @@ Add to `.env`: `OPENAI_API_KEY=...`, `ANTHROPIC_API_KEY=...`, or `GROQ_API_KEY=.
 ### Steps
 
 1. **Create an index** with integrated embeddings using CLI
-2. **Prepare sample data** from different domains (history, science, art, etc.)
-3. **Upsert data** into the index
-4. **Search** for semantically similar documents
-5. **Rerank results** for better accuracy
+2. **Wait for index** to be ready (sleep 5 seconds)
+3. **Prepare sample data** from different domains (history, science, art, etc.)
+4. **Upsert data** into the index
+5. **Search** for semantically similar documents
+6. **Rerank results** for better accuracy
 
 ### Sample Data (Use in All Languages)
 

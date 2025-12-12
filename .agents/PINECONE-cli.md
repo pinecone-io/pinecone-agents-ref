@@ -48,6 +48,37 @@ pc auth login
 - **Use Option 2 (API Key)** or **Option 3 (Service Account)** instead
 - These methods work in all environments and are better suited for automation
 
+### Option 2a: Environment Variable (Recommended for Quickstarts)
+
+Simplest method - CLI reads `PINECONE_API_KEY` from your environment:
+
+1. Create `.env` file:
+
+```bash
+PINECONE_API_KEY=your-api-key-here
+```
+
+2. Load into shell:
+
+```bash
+source .env
+```
+
+3. Export for CLI use (required for quickstart):
+
+```bash
+export PINECONE_API_KEY
+```
+
+4. CLI commands now work automatically.
+
+**Benefits:**
+- Same API key for CLI and SDK
+- No separate configuration step
+- Perfect for development and quickstarts
+
+**Note:** Only persists for current shell session. For persistent auth, use Option 2 below.
+
 ### Option 2: API Key
 
 Use for most automated scenarios, CI/CD, or when browser access is unavailable. Scoped to a specific project.
@@ -135,10 +166,16 @@ pc api-key delete --key-id <key-id>
 # 1. Install CLI (check first: pc version)
 brew tap pinecone-io/tap && brew install pinecone-io/tap/pinecone
 
-# 2. Check authentication status (check first: pc auth status)
-# For interactive environments with browser access:
+# 2. Authenticate (choose one method):
+
+# Option A: Environment variable (recommended for quickstarts)
+# Create .env file with PINECONE_API_KEY=your-key, then:
+source .env
+
+# Option B: Interactive login (requires browser)
 pc auth login
-# OR for non-interactive/automated environments:
+
+# Option C: Direct API key configuration (persists across sessions)
 pc auth configure --api-key your-api-key
 
 # 3. Verify target (if already authenticated) and set it if needed
@@ -198,7 +235,7 @@ pc index create -n my-app-prod -m cosine -c aws -r us-east-1 \
 | ----------------------------------------- | -------------------------------------------------------------------------------- |
 | `pc: command not found`                   | Install CLI: `brew tap pinecone-io/tap && brew install pinecone-io/tap/pinecone` |
 | `Unknown command` or unrecognized command | See troubleshooting steps above (check version, update if needed)                |
-| `Authentication failed`                   | Run `pc auth login` or set an API key or service account                         |
+| `Authentication failed`                   | Run `source .env` (if using .env file), `pc auth login`, or `pc auth configure --api-key` |
 | `Index already exists`                    | Use different name or delete existing: `pc index delete --name <name>`           |
 | `Permission denied`                       | Check API key permissions or organization access                                 |
 
